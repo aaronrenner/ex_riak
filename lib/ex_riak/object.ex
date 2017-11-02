@@ -15,7 +15,7 @@ defmodule ExRiak.Object do
   Returns the value of the object if there are no siblings.
   """
   @spec get_value(t) ::
-    {:ok, value} | {:error, SiblingsError.t | NoValueError.t}
+    {:ok, value} | {:error, SiblingsError.t | NoValueError.t | DecodingError.t}
   def get_value(obj) do
     with {:ok, value} <- do_get(obj, &:riakc_obj.get_value/1),
          {:ok, content_type} <- get_content_type(obj) do
