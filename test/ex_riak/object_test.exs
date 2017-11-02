@@ -90,4 +90,34 @@ defmodule ExRiak.ObjectTest do
       Object.get_content_type!(fetched_obj)
     end
   end
+
+  test "decoding metadata", %{conn: conn} do
+    key = random_string()
+    value = "world"
+    content_type = "text/plain"
+    obj = :riakc_obj.new(basic_bucket(), key, value, content_type)
+
+    :riakc_pb_socket.put(conn, obj)
+
+    {:ok, fetched_obj} = :riakc_pb_socket.get(conn, basic_bucket(), key)
+
+    assert {:ok, metadata} = Object.get_metadata(fetched_obj)
+    assert ^metadata = Object.get_metadata!(fetched_obj)
+  end
+
+  test "decoding metadata with siblings", %{conn: conn} do
+    key = random_string()
+    value = "world"
+    content_type = "text/plain"
+    obj = :riakc_obj.new(basic_bucket(), key, value, content_type)
+    :riakc_pb_socket.put(conn, obj)
+    :riakc_pb_socket.put(conn, obj)
+
+    {:ok, fetched_obj} = :riakc_pb_socket.get(conn, basic_bucket(), key)
+
+    assert {:error, %SiblingsError{}} = Object.get_metadata(fetched_obj)
+    assert_raise SiblingsError, fn ->
+      Object.get_metadata!(fetched_obj)
+    end
+  end
 end

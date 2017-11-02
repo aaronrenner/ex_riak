@@ -10,6 +10,7 @@ defmodule ExRiak.Object do
   @type t :: :riakc_obj.riakc_obj
   @type value :: term
   @type content_type :: String.t
+  @type metadata :: :riakc_obj.metadata
 
   @doc """
   Returns the value of the object if there are no siblings.
@@ -72,8 +73,27 @@ defmodule ExRiak.Object do
     end
   end
 
+  @doc """
+  Returns the metadata for the object if there are no siblings.
+  """
+  @spec get_metadata(t) :: {:ok, metadata} | {:error, SiblingsError.t}
+  def get_metadata(obj) do
+    do_get(obj, &:riakc_obj.get_metadata/1)
+  end
+
+  @doc """
+  Returns the metadata for the object, erroring out if there are siblings.
+  """
+  @spec get_metadata!(t) :: metadata | no_return
+  def get_metadata!(obj) do
+    case get_metadata(obj) do
+      {:ok, metadata} -> metadata
+      {:error, error} -> raise error
+    end
+  end
+
   @spec do_get(t, function) ::
-    {:ok, term} | {:error, SiblingsError.t | NoValueError.t}
+    {:ok, term} | {:error, SiblingsError.t, NoValueError.t}
   defp do_get(obj, function) do
     {:ok, function.(obj)}
   catch
