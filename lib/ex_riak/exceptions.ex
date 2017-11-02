@@ -17,6 +17,26 @@ defmodule ExRiak.NoValueError do
   end
 end
 
+defmodule ExRiak.PBSocketError do
+  @moduledoc """
+  Raised when there was an error on a PBSocket operation
+  """
+
+  @type t :: %__MODULE__{
+    message: String.t,
+    reason: term
+  }
+
+  defexception [:message, :reason]
+
+  def exception(opts) do
+    reason = Keyword.fetch!(opts, :reason)
+    message =
+      "unexpected error while communicating over pb socket: #{inspect reason}"
+    %__MODULE__{message: message, reason: reason}
+  end
+end
+
 defmodule ExRiak.SiblingsError do
   @moduledoc """
   Raised when unexpected siblings are returned for an object.
