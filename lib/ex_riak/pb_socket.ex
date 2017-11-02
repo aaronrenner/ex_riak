@@ -5,6 +5,7 @@ defmodule ExRiak.PBSocket do
 
   alias ExRiak.Object
   alias ExRiak.PBSocketError
+  alias ExRiak.SiblingsError
 
   @type bucket :: String.t
   @type bucket_type :: String.t
@@ -22,6 +23,35 @@ defmodule ExRiak.PBSocket do
       {:ok, obj} -> {:ok, obj}
       {:error, :notfound} -> {:error, :not_found}
       {:error, reason} -> {:error, PBSocketError.exception(reason: reason)}
+    end
+  end
+
+  @doc """
+  Puts the metadata/value in the object under the bucket/key.
+  """
+  @spec put(pid, Object.t) ::
+    :ok | {:ok, Object.t} | {:error, PBSocketError.t | SiblingsError.t}
+  def put(client, obj) do
+    case :riakc_pb_socket.put(client, obj) do
+      :ok -> :ok
+      {:ok, obj} -> {:ok, obj}
+      {:error, reason} -> {:error, PBSocketError.exception(reason: reason)}
+    end
+  catch
+    :siblings -> {:error, SiblingsError.exception(object: obj)}
+  end
+
+  @doc """
+  Puts the metadata/value in the object under the bucket/key and raises on
+  failure.
+  """
+  @spec put!(pid, Object.t) ::
+    :ok | Object.t
+  def put!(client, obj) do
+    case put(client, obj) do
+      :ok -> :ok
+      {:ok, obj} -> obj
+      {:error, error} -> raise error
     end
   end
 end
