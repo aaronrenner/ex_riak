@@ -38,12 +38,22 @@ defmodule ExRiak.Object do
   end
 
   @doc """
+  Returns a list of content types for all siblings.
+  """
+  @spec get_content_types(t) :: [content_type]
+  def get_content_types(obj) do
+    obj
+    |> :riakc_obj.get_content_types()
+    |> Enum.map(&decode_content_type/1)
+  end
+
+  @doc """
   Returns the content type of the value if there are no siblings.
   """
   @spec get_content_type(t) :: {:ok, content_type} | {:error, SiblingsError.t}
   def get_content_type(obj) do
     with {:ok, content_type} <- do_get(obj, &:riakc_obj.get_content_type/1) do
-      {:ok, List.to_string(content_type)}
+      {:ok, decode_content_type(content_type)}
     end
   end
 
@@ -74,4 +84,9 @@ defmodule ExRiak.Object do
     {:ok, :erlang.binary_to_term(value)}
   end
   defp decode_value(value, _), do: {:ok, value}
+
+  @spec decode_content_type(charlist) :: String.t
+  defp decode_content_type(content_type) do
+    List.to_string(content_type)
+  end
 end

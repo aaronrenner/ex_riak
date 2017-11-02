@@ -33,6 +33,28 @@ defmodule ExRiak.ObjectTest do
   test "decoding a string with siblings", %{conn: conn} do
     key = random_string()
     value = "world"
+    content_type = "text/plain"
+    obj = :riakc_obj.new(basic_bucket(), key, value, content_type)
+    :riakc_pb_socket.put(conn, obj)
+    :riakc_pb_socket.put(conn, obj)
+
+    {:ok, fetched_obj} = :riakc_pb_socket.get(conn, basic_bucket(), key)
+
+    assert {:error, %SiblingsError{}} = Object.get_value(fetched_obj)
+    assert_raise SiblingsError, fn ->
+       Object.get_value!(fetched_obj)
+    end
+    assert {:error, %SiblingsError{}} = Object.get_content_type(fetched_obj)
+    assert_raise SiblingsError, fn ->
+      Object.get_content_type!(fetched_obj)
+    end
+    assert {:error, %SiblingsError{}} = Object.get_content_type(fetched_obj)
+    assert [^content_type, ^content_type] = Object.get_content_types(fetched_obj)
+  end
+
+  test "decoding an erlang term with siblings", %{conn: conn} do
+    key = random_string()
+    value = %{name: "Aaron"}
     obj = :riakc_obj.new(basic_bucket(), key, value, 'text/plain')
     :riakc_pb_socket.put(conn, obj)
     :riakc_pb_socket.put(conn, obj)
