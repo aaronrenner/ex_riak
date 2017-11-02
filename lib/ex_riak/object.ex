@@ -72,12 +72,13 @@ defmodule ExRiak.Object do
     end
   end
 
-  @spec do_get(t, function) :: {:ok, term} | {:error, SiblingsError.t}
+  @spec do_get(t, function) ::
+    {:ok, term} | {:error, SiblingsError.t | NoValueError.t}
   defp do_get(obj, function) do
     {:ok, function.(obj)}
   catch
     :siblings -> {:error, SiblingsError.exception(object: obj)}
-    :no_value -> {:no_value, NoValueError.exception(object: obj)}
+    :no_value -> {:error, NoValueError.exception(object: obj)}
   end
 
   @spec decode_value(value, content_type) ::
