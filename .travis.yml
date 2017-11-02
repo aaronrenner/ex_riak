@@ -1,0 +1,30 @@
+language: elixir
+elixir:
+  - 1.5.2
+otp_release:
+  - 20.0
+dist: trusty
+sudo: required
+
+cache:
+  directories:
+    - _build
+    - deps
+
+before_install:
+  - curl -s https://packagecloud.io/install/repositories/basho/riak/script.deb.sh | sudo bash
+  - sudo apt-get install riak=2.2.3-1
+  - sudo service riak start
+  - sleep 15 # wait for riak start
+
+before_script:
+  - mix local.hex --force
+  - mix deps.get --only test
+  - mix deps.clean --unused
+  - MIX_ENV=test mix compile --warnings-as-errors
+  - MIX_ENV=test travis_wait mix dialyzer --plt
+
+script:
+  - mix test
+  - MIX_ENV=test mix credo --strict
+  - MIX_ENV=test mix dialyzer --halt-exit-status
