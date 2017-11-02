@@ -1,3 +1,29 @@
+defmodule ExRiak.DecodingError do
+  @moduledoc """
+  Raised when unable to decode erlang binary from database
+  """
+
+  @type t :: %__MODULE__{
+    message: String.t,
+    value: bitstring,
+    content_type: ExRiak.Object.content_type
+  }
+
+  defexception [:message, :value, :content_type]
+
+  def exception(opts) do
+    value = Keyword.fetch!(opts, :value)
+    content_type = Keyword.fetch!(opts, :content_type)
+    message = """
+    unable to decode value for content type #{inspect content_type}
+
+    Value:
+    #{inspect value}
+    """
+    %__MODULE__{message: message, value: value, content_type: content_type}
+  end
+end
+
 defmodule ExRiak.NoValueError do
   @moduledoc """
   Raised when no value was found for an object.

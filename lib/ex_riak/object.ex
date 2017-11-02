@@ -3,6 +3,7 @@ defmodule ExRiak.Object do
   Wrapper around `:riakc_obj` API.
   """
 
+  alias ExRiak.DecodingError
   alias ExRiak.NoValueError
   alias ExRiak.SiblingsError
 
@@ -79,9 +80,13 @@ defmodule ExRiak.Object do
     :no_value -> {:no_value, NoValueError.exception(object: obj)}
   end
 
-  @spec decode_value(value, content_type) :: {:ok, value}
-  defp decode_value(value, "application/x-erlang-binary") do
+  @spec decode_value(value, content_type) ::
+    {:ok, value} | {:error, DecodingError.t}
+  defp decode_value(value, "application/x-erlang-binary" = ct) do
     {:ok, :erlang.binary_to_term(value)}
+  rescue
+    ArgumentError ->
+      {:error, DecodingError.exception(value: value, content_type: ct)}
   end
   defp decode_value(value, _), do: {:ok, value}
 
