@@ -18,6 +18,8 @@ before_install:
   - sleep 15 # wait for riak start
 
 before_script:
+  - sudo riak-admin bucket-type create ex_riak
+  - sudo riak-admin bucket-type activate ex_riak
   - mix local.hex --force
   - mix deps.get --only test
   - mix deps.clean --unused
