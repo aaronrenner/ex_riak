@@ -54,10 +54,7 @@ defmodule ExRiak.Mixfile do
   end
 
   defp description do
-    """
-    A simple wrapper around riak-erlang-client, designed to let you follow
-    Elixir coding conventions.
-    """
+    "A simple wrapper around riak-erlang-client, designed to let you follow Elixir coding conventions."
   end
 
   defp package do
