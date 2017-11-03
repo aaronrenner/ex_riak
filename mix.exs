@@ -1,18 +1,23 @@
 defmodule ExRiak.Mixfile do
   use Mix.Project
 
+  @version "0.1.0"
+  @maintainers ["Aaron Renner"]
+  @source_url "https://github.com/aaronrenner/ex_riak"
+
   def project do
     [
       app: :ex_riak,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env),
       start_permanent: Mix.env == :prod,
+      description: description(),
+      package: package(),
       deps: deps(),
 
       # Docs
       name: "ExRiak",
-      source_url: "https://github.com/aaronrenner/ex_riak",
       docs: docs(),
       dialyzer: [plt_add_apps: [:ex_unit]],
     ]
@@ -43,6 +48,25 @@ defmodule ExRiak.Mixfile do
   defp docs do
     [
       main: "ExRiak",
+      source_url: @source_url,
+      source_ref: "v#{@version}"
+    ]
+  end
+
+  defp description do
+    """
+    A simple wrapper around riak-erlang-client, designed to let you follow
+    Elixir coding conventions.
+    """
+  end
+
+  defp package do
+    [
+      maintainers: @maintainers,
+      licenses: ["MIT"],
+      links: %{
+        "Github" => @source_url
+      }
     ]
   end
 end
