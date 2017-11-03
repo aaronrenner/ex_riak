@@ -42,8 +42,7 @@ defmodule ExRiak.Mixfile do
   # Run "mix help docs" to learn about docs
   defp docs do
     [
-      extras: ["README.md"],
-      main: "readme",
+      main: "ExRiak",
     ]
   end
 end

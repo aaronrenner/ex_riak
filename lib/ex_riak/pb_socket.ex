@@ -1,7 +1,9 @@
 defmodule ExRiak.PBSocket do
   @moduledoc """
-  Wrapper around `:riakc_pb_socket` API.
+  Wrapper around the #{ExRiak.Docs.erlang_doc_link(:riakc_pb_socket)} API.
   """
+
+  import ExRiak.Docs
 
   alias ExRiak.Object
   alias ExRiak.PBSocketError
@@ -15,6 +17,8 @@ defmodule ExRiak.PBSocket do
 
   @doc """
   Gets bucket/key from server
+
+  See #{erlang_doc_link({:riakc_pb_socket, :get, 3})}.
   """
   @spec get(pid, bucket_locator, key) ::
     {:ok, Object.t} | {:error, :not_found | PBSocketError.t}
@@ -28,6 +32,8 @@ defmodule ExRiak.PBSocket do
 
   @doc """
   Puts the metadata/value in the object under the bucket/key.
+
+  See #{erlang_doc_link({:riakc_pb_socket, :put, 2})}.
   """
   @spec put(pid, Object.t) ::
     :ok | {:ok, Object.t} | {:error, PBSocketError.t | SiblingsError.t}
@@ -44,6 +50,8 @@ defmodule ExRiak.PBSocket do
   @doc """
   Puts the metadata/value in the object under the bucket/key and raises on
   failure.
+
+  See #{erlang_doc_link({:riakc_pb_socket, :put, 2})}.
   """
   @spec put!(pid, Object.t) ::
     :ok | Object.t

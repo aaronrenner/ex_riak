@@ -1,7 +1,9 @@
 defmodule ExRiak.Object do
   @moduledoc """
-  Wrapper around `:riakc_obj` API.
+  Wrapper around #{ExRiak.Docs.erlang_doc_link(:riakc_obj)} API.
   """
+
+  import ExRiak.Docs
 
   alias ExRiak.DecodingError
   alias ExRiak.NoValueError
@@ -14,6 +16,8 @@ defmodule ExRiak.Object do
 
   @doc """
   Returns the value of the object if there are no siblings.
+
+  See #{erlang_doc_link({:riakc_obj, :get_value, 1})}.
   """
   @spec get_value(t) ::
     {:ok, value} | {:error, SiblingsError.t | NoValueError.t | DecodingError.t}
@@ -30,6 +34,8 @@ defmodule ExRiak.Object do
   If there are no siblings, the corresponding value is returned.
   If there are siblings, a `ExRiak.SiblingsError` exception is raised.
   If there is no value, a `ExRiak.NoValueError` exception is raised.
+
+  See #{erlang_doc_link({:riakc_obj, :get_value, 1})}.
   """
   @spec get_value!(t) :: value | no_return
   def get_value!(obj) do
@@ -41,6 +47,8 @@ defmodule ExRiak.Object do
 
   @doc """
   Returns a list of content types for all siblings.
+
+  See #{erlang_doc_link({:riakc_obj, :get_content_types, 1})}.
   """
   @spec get_content_types(t) :: [content_type]
   def get_content_types(obj) do
@@ -51,6 +59,8 @@ defmodule ExRiak.Object do
 
   @doc """
   Returns the content type of the value if there are no siblings.
+
+  See #{erlang_doc_link({:riakc_obj, :get_content_type, 1})}.
   """
   @spec get_content_type(t) :: {:ok, content_type} | {:error, SiblingsError.t}
   def get_content_type(obj) do
@@ -64,6 +74,8 @@ defmodule ExRiak.Object do
 
   If there are no siblings, the content type is returned.
   If there are siblings, a `ExRiak.SiblingsError` exception is raised.
+
+  See #{erlang_doc_link({:riakc_obj, :get_content_type, 1})}.
   """
   @spec get_content_type!(t) :: content_type | no_return
   def get_content_type!(obj) do
@@ -75,6 +87,8 @@ defmodule ExRiak.Object do
 
   @doc """
   Returns the metadata for the object if there are no siblings.
+
+  See #{erlang_doc_link({:riakc_obj, :get_metadata, 1})}.
   """
   @spec get_metadata(t) :: {:ok, metadata} | {:error, SiblingsError.t}
   def get_metadata(obj) do
@@ -83,6 +97,8 @@ defmodule ExRiak.Object do
 
   @doc """
   Returns the metadata for the object, erroring out if there are siblings.
+
+  See #{erlang_doc_link({:riakc_obj, :get_metadata, 1})}.
   """
   @spec get_metadata!(t) :: metadata | no_return
   def get_metadata!(obj) do
