@@ -108,7 +108,8 @@ defmodule ExRiak.Object do
 
   See #{erlang_doc_link({:riakc_obj, :get_content_type, 1})}.
   """
-  @spec get_content_type(t) :: {:ok, content_type} | {:error, SiblingsError.t}
+  @spec get_content_type(t) ::
+    {:ok, content_type | :undefined} | {:error, SiblingsError.t}
   def get_content_type(obj) do
     with {:ok, content_type} <- do_get(obj, &:riakc_obj.get_content_type/1) do
       {:ok, decode_content_type(content_type)}
@@ -123,7 +124,7 @@ defmodule ExRiak.Object do
 
   See #{erlang_doc_link({:riakc_obj, :get_content_type, 1})}.
   """
-  @spec get_content_type!(t) :: content_type | no_return
+  @spec get_content_type!(t) :: content_type | :undefined | no_return
   def get_content_type!(obj) do
     case get_content_type(obj) do
       {:ok, content_type} -> content_type
@@ -154,6 +155,28 @@ defmodule ExRiak.Object do
     end
   end
 
+  @doc """
+  Returns the content type of the update value.
+
+  See #{erlang_doc_link({:riakc_obj, :get_update_content_type, 1})}.
+  """
+  @spec get_update_content_type(t) :: content_type | :undefined
+  def get_update_content_type(obj) do
+    obj
+    |> :riakc_obj.get_update_content_type()
+    |> decode_content_type
+  end
+
+  @doc """
+  Sets the updated content type of an object.
+
+  See #{erlang_doc_link({:riakc_obj, :update_content_type, 2})}.
+  """
+  @spec update_content_type(t, content_type) :: t
+  def update_content_type(obj, content_type) do
+    :riakc_obj.update_content_type(obj, content_type)
+  end
+
   @spec do_get(t, function) ::
     {:ok, term} | {:error, SiblingsError.t, NoValueError.t}
   defp do_get(obj, function) do
@@ -173,7 +196,8 @@ defmodule ExRiak.Object do
   end
   defp decode_value(value, _), do: {:ok, value}
 
-  @spec decode_content_type(charlist) :: String.t
+  @spec decode_content_type(charlist | :undefined) :: String.t | :undefined
+  defp decode_content_type(:undefined), do: :undefined
   defp decode_content_type(content_type) do
     List.to_string(content_type)
   end

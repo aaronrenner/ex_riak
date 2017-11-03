@@ -4,12 +4,13 @@ defmodule ExRiak.ObjectTest do
   alias ExRiak.DecodingError
   alias ExRiak.NoValueError
   alias ExRiak.Object
+  alias ExRiak.PBSocket
   alias ExRiak.SiblingsError
 
   test "decoding a string", %{conn: conn} do
     key = random_string()
     value = "world"
-    obj = Object.new(basic_bucket(), key, value, 'text/plain')
+    obj = Object.new(basic_bucket(), key, value, "text/plain")
     :riakc_pb_socket.put(conn, obj)
 
     {:ok, fetched_obj} = :riakc_pb_socket.get(conn, basic_bucket(), key)
@@ -23,7 +24,7 @@ defmodule ExRiak.ObjectTest do
   test "decoding an erlang term", %{conn: conn} do
     key = random_string()
     value = %{name: "Aaron"}
-    obj = Object.new(basic_bucket(), key, value, 'text/plain')
+    obj = Object.new(basic_bucket(), key, value, "text/plain")
     :riakc_pb_socket.put(conn, obj)
 
     {:ok, fetched_obj} = :riakc_pb_socket.get(conn, basic_bucket(), key)
@@ -49,6 +50,38 @@ defmodule ExRiak.ObjectTest do
     assert_raise DecodingError, fn ->
       Object.get_value!(fetched_obj)
     end
+  end
+
+  test "saving and retrieving string without a content type", %{conn: conn} do
+    key = random_string()
+    value = "Hello"
+    obj = Object.new(basic_bucket(), key, value)
+
+    PBSocket.put!(conn, obj)
+
+    {:ok, fetched_obj} = PBSocket.get(conn, basic_bucket(), key)
+    assert ^value = Object.get_value!(fetched_obj)
+    assert :undefined = Object.get_content_type!(fetched_obj)
+  end
+
+  test "trying to clear a content type for an object" do
+    obj = Object.new(basic_bucket(), "key", "val", "text/plain")
+
+    assert_raise FunctionClauseError, fn ->
+      Object.update_content_type(obj, :undefined)
+    end
+  end
+
+  test "saving and retrieving term without a content type", %{conn: conn} do
+    key = random_string()
+    value = %{password: "secret"}
+    obj = Object.new(basic_bucket(), key, value)
+
+    PBSocket.put!(conn, obj)
+
+    {:ok, fetched_obj} = PBSocket.get(conn, basic_bucket(), key)
+    assert ^value = Object.get_value!(fetched_obj)
+    assert "application/x-erlang-binary" = Object.get_content_type!(fetched_obj)
   end
 
   test "decoding a string with siblings", %{conn: conn} do
@@ -128,12 +161,22 @@ defmodule ExRiak.ObjectTest do
 
     assert {:error, %NoValueError{}} = Object.get_value(obj)
     assert_raise NoValueError, fn -> Object.get_value!(obj) end
+
+    assert [] = Object.get_content_types(obj)
+    assert {:ok, :undefined} = Object.get_content_type(obj)
+    assert :undefined = Object.get_update_content_type(obj)
   end
 
   test "with a String as a content type" do
     obj = Object.new("bucket", "key", "value", "text/plain")
 
     assert 'text/plain' = :riakc_obj.get_update_content_type(obj)
+    assert "text/plain" = Object.get_update_content_type(obj)
+
+    obj = Object.update_content_type(obj, "application/json")
+
+    assert 'application/json' = :riakc_obj.get_update_content_type(obj)
+    assert "application/json" = Object.get_update_content_type(obj)
   end
 
   describe "new/2" do
