@@ -127,16 +127,39 @@ defmodule ExRiak.ObjectTest do
 
   test "decoding metadata", %{conn: conn} do
     key = random_string()
-    value = "world"
-    content_type = "text/plain"
-    obj = Object.new(basic_bucket(), key, value, content_type)
+    {metadata_key_1, metadata_value_1} = metadata_entry_1 = {"account", "3"}
+    {metadata_key_2, metadata_value_2} = metadata_entry_2 = {"valid", "true"}
+    {metadata_key_3, _} = metadata_entry_3 = {"remove", "me"}
+    obj = Object.new(basic_bucket(), key, "val", "text/plain")
+    metadata =
+      obj
+      |> Object.get_metadata!()
+      |> Object.set_user_metadata_entry(metadata_entry_1)
+      |> Object.set_user_metadata_entry(metadata_entry_2)
+      |> Object.set_user_metadata_entry(metadata_entry_3)
+      |> Object.delete_user_metadata_entry(metadata_key_3)
+    obj = Object.update_metadata(obj, metadata)
+    PBSocket.put!(conn, obj)
 
-    :riakc_pb_socket.put(conn, obj)
-
-    {:ok, fetched_obj} = :riakc_pb_socket.get(conn, basic_bucket(), key)
+    {:ok, fetched_obj} = PBSocket.get(conn, basic_bucket(), key)
 
     assert {:ok, metadata} = Object.get_metadata(fetched_obj)
     assert ^metadata = Object.get_metadata!(fetched_obj)
+
+    assert metadata_entry_1 in Object.get_user_metadata_entries(metadata)
+    assert metadata_entry_2 in Object.get_user_metadata_entries(metadata)
+    refute metadata_entry_3 in Object.get_user_metadata_entries(metadata)
+
+    assert ^metadata_value_1 =
+      Object.get_user_metadata_entry(metadata, metadata_key_1)
+    assert ^metadata_value_2 =
+      Object.get_user_metadata_entry(metadata, metadata_key_2)
+    assert is_nil(Object.get_user_metadata_entry(metadata, "does not exist"))
+
+    assert [] =
+      metadata
+      |> Object.clear_user_metadata_entries
+      |> Object.get_user_metadata_entries
   end
 
   test "decoding metadata with siblings", %{conn: conn} do
@@ -165,6 +188,9 @@ defmodule ExRiak.ObjectTest do
     assert [] = Object.get_content_types(obj)
     assert {:ok, :undefined} = Object.get_content_type(obj)
     assert :undefined = Object.get_update_content_type(obj)
+
+    metadata = Object.get_update_metadata(obj)
+    assert [] = Object.get_user_metadata_entries(metadata)
   end
 
   test "with a String as a content type" do

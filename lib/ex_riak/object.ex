@@ -15,6 +15,9 @@ defmodule ExRiak.Object do
   @type value :: term
   @type content_type :: String.t
   @type metadata :: :riakc_obj.metadata
+  @type metadata_key :: String.t
+  @type metadata_value :: String.t
+  @type metadata_entry :: {metadata_key, metadata_value}
 
   @typep new_object_error_reasons :: {:zero_length_bucket, :zero_length_key}
 
@@ -153,6 +156,80 @@ defmodule ExRiak.Object do
       {:ok, metadata} -> metadata
       {:error, error} -> raise error
     end
+  end
+
+  @doc """
+  Returns the updated metadata for this object.
+
+  See #{erlang_doc_link({:riakc_obj, :get_update_metadata, 1})}.
+  """
+  @spec get_update_metadata(t) :: metadata
+  def get_update_metadata(obj) do
+    :riakc_obj.get_update_metadata(obj)
+  end
+
+  @doc """
+  Sets the updated metadata of an object.
+
+  See #{erlang_doc_link({:riakc_obj, :update_metadata, 2})}.
+  """
+  @spec update_metadata(t, metadata) :: t
+  def update_metadata(obj, metadata) do
+    :riakc_obj.update_metadata(obj, metadata)
+  end
+
+  @doc """
+  Get all metadata entries.
+
+  See #{erlang_doc_link({:riakc_obj, :get_user_metadata_entries, 1})}.
+  """
+  @spec get_user_metadata_entries(metadata) :: [metadata_entry]
+  def get_user_metadata_entries(metadata) do
+    :riakc_obj.get_user_metadata_entries(metadata)
+  end
+
+  @doc """
+  Get specific metadata entry.
+
+  See #{erlang_doc_link({:riakc_obj, :get_user_metadata_entry, 2})}.
+  """
+  @spec get_user_metadata_entry(metadata, metadata_key) ::
+    metadata_value | nil
+  def get_user_metadata_entry(metadata, metadata_key) do
+    case :riakc_obj.get_user_metadata_entry(metadata, metadata_key) do
+      :notfound -> nil
+      value -> value
+    end
+  end
+
+  @doc """
+  Sets a metadata entry.
+
+  See #{erlang_doc_link({:riakc_obj, :set_user_metadata_entry, 2})}.
+  """
+  @spec set_user_metadata_entry(metadata, metadata_entry) :: metadata
+  def set_user_metadata_entry(metadata, metadata_entry) do
+    :riakc_obj.set_user_metadata_entry(metadata, metadata_entry)
+  end
+
+  @doc """
+  Deletes a specific metadata entry.
+
+  See #{erlang_doc_link({:riakc_obj, :delete_user_metadata_entry, 2})}.
+  """
+  @spec delete_user_metadata_entry(metadata, metadata_key) :: metadata
+  def delete_user_metadata_entry(metadata, metadata_key) do
+    :riakc_obj.delete_user_metadata_entry(metadata, metadata_key)
+  end
+
+  @doc """
+  Clears all metadata entries.
+
+  See #{erlang_doc_link({:riakc_obj, :clear_user_metadata_entries, 1})}.
+  """
+  @spec clear_user_metadata_entries(metadata) :: metadata
+  def clear_user_metadata_entries(metadata) do
+    :riakc_obj.clear_user_metadata_entries(metadata)
   end
 
   @doc """
