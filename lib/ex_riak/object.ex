@@ -10,9 +10,55 @@ defmodule ExRiak.Object do
   alias ExRiak.SiblingsError
 
   @type t :: :riakc_obj.riakc_obj
+  @type bucket_locator :: ExRiak.bucket_locator
+  @type key :: ExRiak.key
   @type value :: term
   @type content_type :: String.t
   @type metadata :: :riakc_obj.metadata
+
+  @typep new_object_error_reasons :: {:zero_length_bucket, :zero_length_key}
+
+  @doc """
+  Constructor for new riak_client objects.
+
+  Raises an `ArgumentError` with an invalid bucket locator.
+
+  See #{erlang_doc_link({:riakc_obj, :new, 2})}.
+  """
+  @spec new(bucket_locator, key) :: t | no_return
+  def new(bucket_locator, key) do
+    bucket_locator
+    |> :riakc_obj.new(key)
+    |> raise_on_new_error_response
+  end
+
+  @doc """
+  Constructor for new riak client objects with an update value.
+
+  Raises an `ArgumentError` with an invalid bucket locator.
+
+  See #{erlang_doc_link({:riakc_obj, :new, 3})}.
+  """
+  @spec new(bucket_locator, key, value) :: t | no_return
+  def new(bucket_locator, key, value) do
+    bucket_locator
+    |> :riakc_obj.new(key, value)
+    |> raise_on_new_error_response
+  end
+
+  @doc """
+  Constructor for new riak client objects with an update value and content type.
+
+  Raises an `ArgumentError` with an invalid bucket locator.
+
+  See #{erlang_doc_link({:riakc_obj, :new, 4})}.
+  """
+  @spec new(bucket_locator, key, value, content_type) :: t | no_return
+  def new(bucket_locator, key, value, content_type) do
+    bucket_locator
+    |> :riakc_obj.new(key, value, to_charlist(content_type))
+    |> raise_on_new_error_response
+  end
 
   @doc """
   Returns the value of the object if there are no siblings.
@@ -131,4 +177,14 @@ defmodule ExRiak.Object do
   defp decode_content_type(content_type) do
     List.to_string(content_type)
   end
+
+  @spec raise_on_new_error_response(t | {:error, new_object_error_reasons}) ::
+    t | no_return
+  defp raise_on_new_error_response({:error, :zero_length_bucket}) do
+    raise ArgumentError, "empty value for bucket name"
+  end
+  defp raise_on_new_error_response({:error, :zero_length_key}) do
+    raise ArgumentError, "empty value for key"
+  end
+  defp raise_on_new_error_response(obj), do: obj
 end

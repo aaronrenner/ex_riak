@@ -17,4 +17,29 @@ defmodule ExRiak do
   * [Basho Riak Docs](http://docs.basho.com/riak/kv/2.2.3)
   * [basho/riak-erlang-client](https://github.com/basho/riak-erlang-client)
   """
+
+  @typedoc """
+  A riak bucket name
+  """
+  @type bucket :: String.t
+
+  @typedoc """
+  A riak bucket type.
+  """
+  @type bucket_type :: String.t
+
+  @typedoc """
+  Combination of bucket_type and bucket
+  """
+  @type bucket_and_type :: {bucket_type, bucket}
+
+  @typedoc """
+  Term used to locate a bucket
+  """
+  @type bucket_locator :: bucket_and_type | bucket
+
+  @typedoc """
+  Riak object key
+  """
+  @type key :: String.t
 end

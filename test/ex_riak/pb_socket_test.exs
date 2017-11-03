@@ -1,6 +1,7 @@
 defmodule ExRiak.PBSocketTest do
   use ExRiak.RiakCase
 
+  alias ExRiak.Object
   alias ExRiak.PBSocket
   alias ExRiak.SiblingsError
 
@@ -8,7 +9,7 @@ defmodule ExRiak.PBSocketTest do
     test "when an object is found", %{conn: conn} do
       key = random_string()
       value = "world"
-      obj = :riakc_obj.new(basic_bucket(), key, value, 'text/plain')
+      obj = Object.new(basic_bucket(), key, value, 'text/plain')
       :riakc_pb_socket.put(conn, obj)
 
       assert {:ok, _} = PBSocket.get(conn, basic_bucket(), key)
@@ -23,7 +24,7 @@ defmodule ExRiak.PBSocketTest do
   test "trying to update an object with siblings", %{conn: conn} do
     key = random_string()
     value = "world"
-    obj = :riakc_obj.new(basic_bucket(), key, value, 'text/plain')
+    obj = Object.new(basic_bucket(), key, value, 'text/plain')
     :riakc_pb_socket.put(conn, obj)
     :riakc_pb_socket.put(conn, obj)
 
