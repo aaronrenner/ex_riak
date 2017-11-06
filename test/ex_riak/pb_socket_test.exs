@@ -1,6 +1,7 @@
 defmodule ExRiak.PBSocketTest do
   use ExRiak.RiakCase
 
+  alias ExRiak.NoValueError
   alias ExRiak.Object
   alias ExRiak.PBSocket
   alias ExRiak.SiblingsError
@@ -33,5 +34,13 @@ defmodule ExRiak.PBSocketTest do
 
     assert {:error, %SiblingsError{}} = PBSocket.put(conn, fetched_obj)
     assert_raise SiblingsError, fn -> PBSocket.put!(conn, fetched_obj) end
+  end
+
+  test "trying to put an empty object", %{conn: conn} do
+    key = random_string()
+    obj = Object.new(basic_bucket(), key)
+
+    assert {:error, %NoValueError{}} = PBSocket.put(conn, obj)
+    assert_raise NoValueError, fn -> PBSocket.put!(conn, obj) end
   end
 end

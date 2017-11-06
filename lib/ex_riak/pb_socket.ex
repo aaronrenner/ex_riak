@@ -5,6 +5,7 @@ defmodule ExRiak.PBSocket do
 
   import ExRiak.Docs
 
+  alias ExRiak.NoValueError
   alias ExRiak.Object
   alias ExRiak.PBSocketError
   alias ExRiak.SiblingsError
@@ -45,6 +46,7 @@ defmodule ExRiak.PBSocket do
     end
   catch
     :siblings -> {:error, SiblingsError.exception(object: obj)}
+    :no_value -> {:error, NoValueError.exception(object: obj)}
   end
 
   @doc """
