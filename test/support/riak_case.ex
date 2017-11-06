@@ -1,6 +1,8 @@
 defmodule ExRiak.RiakCase do
   use ExUnit.CaseTemplate
 
+  alias ExRiak.PBSocket
+
   using do
     quote do
       import unquote(__MODULE__)
@@ -30,13 +32,13 @@ defmodule ExRiak.RiakCase do
   end
 
   def build_connection do
-    :riakc_pb_socket.start_link('127.0.0.1', 8087)
+    PBSocket.start_link()
   end
 
   def clean_bucket(conn, bucket) do
     {:ok, keys} = :riakc_pb_socket.list_keys(conn, bucket)
     Enum.each keys, fn key ->
-      :ok = :riakc_pb_socket.delete(conn, bucket, key)
+      :ok = PBSocket.delete(conn, bucket, key)
     end
     wait_for_empty(conn, bucket)
   end

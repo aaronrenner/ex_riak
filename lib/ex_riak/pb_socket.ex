@@ -10,11 +10,39 @@ defmodule ExRiak.PBSocket do
   alias ExRiak.PBSocketError
   alias ExRiak.SiblingsError
 
-  @type bucket :: String.t
-  @type bucket_type :: String.t
-  @type bucket_and_type :: {bucket_type, bucket}
-  @type bucket_locator :: bucket_and_type | bucket
-  @type key :: String.t
+  @type bucket_locator :: ExRiak.bucket_locator
+  @type key :: ExRiak.key
+
+  @type port_number :: 0..65_535
+
+  @type start_link_opt ::
+    {:hostname, String.t} |
+    {:port, port_number}
+  @type start_link_opts :: [start_link_opt]
+
+  @doc """
+  Creates a linked process to communicate with the riak server.
+
+  Options:
+    * `:hostname` - IP/Hostname of the riak server. Defaults to `"localhost"`.
+      Can also set default value in application config with:
+
+          config :ex_riak, default_hostname: "my-riak-host"
+    * `:port` - Port of the riak server. Defaults to `8087`
+      Can also set default value in application config with:
+
+          config :ex_riak, default_port: 8087
+    * Additional options are passed directly to `:riak_pb_socket.start_link/3`
+
+  See #{erlang_doc_link({:riakc_pb_socket, :start_link, 3})}.
+  """
+  @spec start_link(start_link_opts) :: GenServer.on_start
+  def start_link(opts \\ []) do
+    {hostname, opts} = Keyword.pop_lazy(opts, :hostname, &default_hostname/0)
+    {port, _opts} = Keyword.pop_lazy(opts, :port, &default_port/0)
+
+    :riakc_pb_socket.start_link(to_charlist(hostname), port)
+  end
 
   @doc """
   Gets bucket/key from server
@@ -89,5 +117,15 @@ defmodule ExRiak.PBSocket do
       :ok -> :ok
       {:error, error} -> raise error
     end
+  end
+
+  @spec default_hostname :: String.t
+  defp default_hostname do
+    Application.get_env(:ex_riak, :default_hostname, "localhost")
+  end
+
+  @spec default_port :: port_number
+  defp default_port do
+    Application.get_env(:ex_riak, :default_port, 8087)
   end
 end
