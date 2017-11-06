@@ -64,4 +64,30 @@ defmodule ExRiak.PBSocket do
       {:error, error} -> raise error
     end
   end
+
+  @doc """
+  Deletes the key/value.
+
+  See #{erlang_doc_link({:riakc_pb_socket, :delete, 3})}.
+  """
+  @spec delete(pid, bucket_locator, key) :: :ok | {:error, PBSocketError.t}
+  def delete(pid, bucket_locator, key) do
+    case :riakc_pb_socket.delete(pid, bucket_locator, key) do
+      :ok -> :ok
+      {:error, reason} -> {:error, PBSocketError.exception(reason: reason)}
+    end
+  end
+
+  @doc """
+  Deletes the key/value, raising an error if there's an issue.
+
+  See #{erlang_doc_link({:riakc_pb_socket, :delete, 3})}.
+  """
+  @spec delete!(pid, bucket_locator, key) :: :ok | no_return
+  def delete!(pid, bucket_locator, key) do
+    case delete(pid, bucket_locator, key) do
+      :ok -> :ok
+      {:error, error} -> raise error
+    end
+  end
 end

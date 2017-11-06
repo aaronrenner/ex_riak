@@ -43,4 +43,42 @@ defmodule ExRiak.PBSocketTest do
     assert {:error, %NoValueError{}} = PBSocket.put(conn, obj)
     assert_raise NoValueError, fn -> PBSocket.put!(conn, obj) end
   end
+
+  describe "delete/3" do
+    test "deleting an object that exists in the db", %{conn: conn} do
+      key = random_string()
+      obj = Object.new(basic_bucket(), key, "hello")
+      PBSocket.put!(conn, obj)
+
+      assert :ok = PBSocket.delete(conn, basic_bucket(), key)
+
+      assert {:error, :not_found} = PBSocket.get(conn, basic_bucket(), key)
+    end
+
+    test "deleting a non-existent key", %{conn: conn} do
+      key = random_string()
+
+      assert :ok = PBSocket.delete(conn, basic_bucket(), key)
+      assert {:error, :not_found} = PBSocket.get(conn, basic_bucket(), key)
+    end
+  end
+
+  describe "delete!/3" do
+    test "deleting an object that exists in the db", %{conn: conn} do
+      key = random_string()
+      obj = Object.new(basic_bucket(), key, "hello")
+      PBSocket.put!(conn, obj)
+
+      assert :ok = PBSocket.delete(conn, basic_bucket(), key)
+
+      assert {:error, :not_found} = PBSocket.get(conn, basic_bucket(), key)
+    end
+
+    test "deleting a non-existent key", %{conn: conn} do
+      key = random_string()
+
+      assert :ok = PBSocket.delete(conn, basic_bucket(), key)
+      assert {:error, :not_found} = PBSocket.get(conn, basic_bucket(), key)
+    end
+  end
 end
