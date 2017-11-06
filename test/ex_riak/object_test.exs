@@ -17,6 +17,8 @@ defmodule ExRiak.ObjectTest do
 
     assert {:ok, ^value} = Object.get_value(fetched_obj)
     assert ^value = Object.get_value!(fetched_obj)
+    assert {:ok, ^value} = Object.get_update_value(fetched_obj)
+    assert ^value = Object.get_update_value!(fetched_obj)
     assert {:ok, "text/plain"} = Object.get_content_type(fetched_obj)
     assert "text/plain" = Object.get_content_type!(fetched_obj)
   end
@@ -31,6 +33,8 @@ defmodule ExRiak.ObjectTest do
 
     assert {:ok, ^value} = Object.get_value(fetched_obj)
     assert ^value = Object.get_value!(fetched_obj)
+    assert {:ok, ^value} = Object.get_update_value(fetched_obj)
+    assert ^value = Object.get_update_value!(fetched_obj)
   end
 
   test "decoding an invalid erlang term", %{conn: conn} do
@@ -49,6 +53,15 @@ defmodule ExRiak.ObjectTest do
 
     assert_raise DecodingError, fn ->
       Object.get_value!(fetched_obj)
+    end
+
+    assert {:error, %DecodingError{
+      value: ^value,
+      content_type: ^content_type
+    }} = Object.get_update_value(fetched_obj)
+
+    assert_raise DecodingError, fn ->
+      Object.get_update_value!(fetched_obj)
     end
   end
 
@@ -98,11 +111,18 @@ defmodule ExRiak.ObjectTest do
     assert_raise SiblingsError, fn ->
        Object.get_value!(fetched_obj)
     end
+    assert {:error, %SiblingsError{}} = Object.get_update_value(fetched_obj)
+    assert_raise SiblingsError, fn ->
+       Object.get_update_value!(fetched_obj)
+    end
     assert {:error, %SiblingsError{}} = Object.get_content_type(fetched_obj)
     assert_raise SiblingsError, fn ->
       Object.get_content_type!(fetched_obj)
     end
-    assert {:error, %SiblingsError{}} = Object.get_content_type(fetched_obj)
+    assert {:error, %SiblingsError{}} = Object.get_update_content_type(fetched_obj)
+    assert_raise SiblingsError, fn ->
+      Object.get_update_content_type!(fetched_obj)
+    end
     assert [^content_type, ^content_type] = Object.get_content_types(fetched_obj)
   end
 
@@ -118,6 +138,10 @@ defmodule ExRiak.ObjectTest do
     assert {:error, %SiblingsError{}} = Object.get_value(fetched_obj)
     assert_raise SiblingsError, fn ->
        Object.get_value!(fetched_obj)
+    end
+    assert {:error, %SiblingsError{}} = Object.get_update_value(fetched_obj)
+    assert_raise SiblingsError, fn ->
+       Object.get_update_value!(fetched_obj)
     end
     assert {:error, %SiblingsError{}} = Object.get_content_type(fetched_obj)
     assert_raise SiblingsError, fn ->
@@ -184,10 +208,11 @@ defmodule ExRiak.ObjectTest do
 
     assert {:error, %NoValueError{}} = Object.get_value(obj)
     assert_raise NoValueError, fn -> Object.get_value!(obj) end
+    assert {:error, %NoValueError{}} = Object.get_update_value(obj)
 
     assert [] = Object.get_content_types(obj)
     assert {:ok, :undefined} = Object.get_content_type(obj)
-    assert :undefined = Object.get_update_content_type(obj)
+    assert :undefined = Object.get_update_content_type!(obj)
 
     metadata = Object.get_update_metadata(obj)
     assert [] = Object.get_user_metadata_entries(metadata)
@@ -197,12 +222,12 @@ defmodule ExRiak.ObjectTest do
     obj = Object.new("bucket", "key", "value", "text/plain")
 
     assert 'text/plain' = :riakc_obj.get_update_content_type(obj)
-    assert "text/plain" = Object.get_update_content_type(obj)
+    assert "text/plain" = Object.get_update_content_type!(obj)
 
     obj = Object.update_content_type(obj, "application/json")
 
     assert 'application/json' = :riakc_obj.get_update_content_type(obj)
-    assert "application/json" = Object.get_update_content_type(obj)
+    assert "application/json" = Object.get_update_content_type!(obj)
   end
 
   describe "new/2" do
@@ -235,6 +260,18 @@ defmodule ExRiak.ObjectTest do
       assert_raise ArgumentError, ~r/empty value for key/, fn ->
         Object.new("my_bucket", "", "value", "text/plain")
       end
+    end
+  end
+
+  describe "update_value/2" do
+    test "updates the value and does not set the content type" do
+      obj =
+        "my_bucket"
+        |> Object.new("key", "value")
+        |> Object.update_value("new value")
+
+      assert "new value" = Object.get_update_value!(obj)
+      assert :undefined = Object.get_content_type!(obj)
     end
   end
 end

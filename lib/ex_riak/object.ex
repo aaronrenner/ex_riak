@@ -95,6 +95,47 @@ defmodule ExRiak.Object do
   end
 
   @doc """
+  Sets the updated value of an object.
+
+  See #{erlang_doc_link({:riakc_obj, :set_value, 2})}.
+  """
+  @spec update_value(t, value) :: t
+  def update_value(obj, value) do
+    :riakc_obj.update_value(obj, value)
+  end
+
+  @doc """
+  Returns the update value of this object if there are no siblings.
+
+  See #{erlang_doc_link({:riakc_obj, :get_update_value, 1})}.
+  """
+  @spec get_update_value(t) ::
+    {:ok, value} | {:error, SiblingsError.t | NoValueError.t | DecodingError.t}
+  def get_update_value(obj) do
+    with {:ok, value} <- do_get(obj, &:riakc_obj.get_update_value/1),
+         {:ok, content_type} <- get_update_content_type(obj) do
+      decode_value(value, content_type)
+    end
+  end
+
+  @doc """
+  Returns the update value for the object, erroring out if there are siblings.
+
+  If there are no siblings, the corresponding value is returned.
+  If there are siblings, a `ExRiak.SiblingsError` exception is raised.
+  If there is no value, a `ExRiak.NoValueError` exception is raised.
+
+  See #{erlang_doc_link({:riakc_obj, :get_update_value, 1})}.
+  """
+  @spec get_update_value!(t) :: value | no_return
+  def get_update_value!(obj) do
+    case get_update_value(obj) do
+      {:ok, value} -> value
+      {:error, error} -> raise error
+    end
+  end
+
+  @doc """
   Returns a list of content types for all siblings.
 
   See #{erlang_doc_link({:riakc_obj, :get_content_types, 1})}.
@@ -237,11 +278,29 @@ defmodule ExRiak.Object do
 
   See #{erlang_doc_link({:riakc_obj, :get_update_content_type, 1})}.
   """
-  @spec get_update_content_type(t) :: content_type | :undefined
+  @spec get_update_content_type(t) ::
+    {:ok, content_type | :undefined} | {:error, SiblingsError.t}
   def get_update_content_type(obj) do
-    obj
-    |> :riakc_obj.get_update_content_type()
-    |> decode_content_type
+    with {:ok, ct} <- do_get(obj, &:riakc_obj.get_update_content_type/1) do
+      {:ok, decode_content_type(ct)}
+    end
+  end
+
+  @doc """
+  Returns the content type for the update value, erroring out if there are
+  siblings.
+
+  If there are no siblings, the content type is returned.
+  If there are siblings, a `ExRiak.SiblingsError` exception is raised.
+
+  See #{erlang_doc_link({:riakc_obj, :get_update_content_type, 1})}.
+  """
+  @spec get_update_content_type!(t) :: content_type | :undefined | no_return
+  def get_update_content_type!(obj) do
+    case get_update_content_type(obj) do
+      {:ok, content_type} -> content_type
+      {:error, error} -> raise error
+    end
   end
 
   @doc """
