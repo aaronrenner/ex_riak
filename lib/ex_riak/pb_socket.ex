@@ -60,6 +60,33 @@ defmodule ExRiak.PBSocket do
   end
 
   @doc """
+  Gets a bucket/key from server.
+
+  Returns nil if not found. Raises an `ExRiak.PBSocketError` on failure.
+
+  ## Example
+
+  This function is especially useful for fetching or creating an object during
+  an [Object Update Cycle][update-cycle].
+
+      {:ok, conn} = PBSocket.start_link()
+
+      obj = PBSocket.get!(conn, "bucket", "key") || Object.new("bucket", "key")
+
+  See #{erlang_doc_link({:riakc_pb_socket, :get, 3})}.
+
+  [update-cycle]: http://docs.basho.com/riak/kv/2.2.3/developing/usage/updating-objects/
+  """
+  @spec get!(pid, bucket_locator, key) :: Object.t | nil | no_return
+  def get!(client, bucket_locator, key) do
+    case get(client, bucket_locator, key) do
+      {:ok, obj} -> obj
+      {:error, :not_found} -> nil
+      {:error, error} -> raise error
+    end
+  end
+
+  @doc """
   Puts the metadata/value in the object under the bucket/key.
 
   See #{erlang_doc_link({:riakc_pb_socket, :put, 2})}.

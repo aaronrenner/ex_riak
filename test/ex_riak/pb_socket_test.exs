@@ -4,6 +4,7 @@ defmodule ExRiak.PBSocketTest do
   alias ExRiak.NoValueError
   alias ExRiak.Object
   alias ExRiak.PBSocket
+  alias ExRiak.PBSocketError
   alias ExRiak.SiblingsError
 
   describe "get/3" do
@@ -13,12 +14,27 @@ defmodule ExRiak.PBSocketTest do
       obj = Object.new(basic_bucket(), key, value, 'text/plain')
       :riakc_pb_socket.put(conn, obj)
 
-      assert {:ok, _} = PBSocket.get(conn, basic_bucket(), key)
+      assert {:ok, obj} = PBSocket.get(conn, basic_bucket(), key)
+      assert ^value = Object.get_value!(obj)
+
+      obj = PBSocket.get!(conn, basic_bucket(), key)
+      assert ^value = Object.get_value!(obj)
     end
 
     test "when an object is not found", %{conn: conn} do
       assert {:error, :not_found} =
         PBSocket.get(conn, basic_bucket(), "does not exist")
+
+     refute PBSocket.get!(conn, basic_bucket(), "does not exist")
+    end
+
+    test "when there is an error", %{conn: conn} do
+      assert {:error, %PBSocketError{}} =
+        PBSocket.get(conn, {"invalid type", "bucket"}, "key")
+
+      assert_raise PBSocketError, fn ->
+        PBSocket.get!(conn, {"invalid type", "bucket"}, "key")
+      end
     end
   end
 
