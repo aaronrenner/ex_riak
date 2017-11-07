@@ -1,6 +1,7 @@
 # ExRiak
 [![Build Status](https://travis-ci.org/aaronrenner/ex_riak.svg?branch=master)](https://travis-ci.org/aaronrenner/ex_riak)
 [![Hex pm](https://img.shields.io/hexpm/v/ex_riak.svg?style=flat)](https://hex.pm/packages/ex_riak)
+[![Inline docs](http://inch-ci.org/github/aaronrenner/ex_riak.svg)](http://inch-ci.org/github/aaronrenner/ex_riak)
 
 
 ExRiak is simple wrapper around [riak-erlang-client][riak_erlang_client_github],
