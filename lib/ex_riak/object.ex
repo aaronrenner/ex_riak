@@ -313,6 +313,22 @@ defmodule ExRiak.Object do
     :riakc_obj.update_content_type(obj, content_type)
   end
 
+  @doc """
+  Returns the number of values (siblings) of an object.
+
+  See #{erlang_doc_link({:riakc_obj, :value_count, 1})}.
+  """
+  @spec value_count(t) :: non_neg_integer
+  def value_count(obj), do: :riakc_obj.value_count(obj)
+
+  @doc """
+  Returns true if this object has more than one sibling.
+
+  See #{erlang_doc_link({:riakc_obj, :value_count, 1})}.
+  """
+  @spec siblings?(t) :: boolean
+  def siblings?(obj), do: value_count(obj) > 1
+
   @spec do_get(t, function) ::
     {:ok, term} | {:error, SiblingsError.t, NoValueError.t}
   defp do_get(obj, function) do

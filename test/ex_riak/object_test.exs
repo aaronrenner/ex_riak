@@ -35,6 +35,8 @@ defmodule ExRiak.ObjectTest do
     assert ^value = Object.get_value!(fetched_obj)
     assert {:ok, ^value} = Object.get_update_value(fetched_obj)
     assert ^value = Object.get_update_value!(fetched_obj)
+    assert 1 = Object.value_count(fetched_obj)
+    refute Object.siblings?(fetched_obj)
   end
 
   test "decoding an invalid erlang term", %{conn: conn} do
@@ -124,6 +126,9 @@ defmodule ExRiak.ObjectTest do
       Object.get_update_content_type!(fetched_obj)
     end
     assert [^content_type, ^content_type] = Object.get_content_types(fetched_obj)
+
+    assert 2 = Object.value_count(fetched_obj)
+    assert Object.siblings?(fetched_obj)
   end
 
   test "decoding an erlang term with siblings", %{conn: conn} do
@@ -216,6 +221,9 @@ defmodule ExRiak.ObjectTest do
 
     metadata = Object.get_update_metadata(obj)
     assert [] = Object.get_user_metadata_entries(metadata)
+
+    assert 0 = Object.value_count(obj)
+    refute Object.siblings?(obj)
   end
 
   test "with a String as a content type" do
