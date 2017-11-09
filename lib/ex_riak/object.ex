@@ -105,6 +105,16 @@ defmodule ExRiak.Object do
   end
 
   @doc """
+  Sets the updated value and content type of an object.
+
+  See #{erlang_doc_link({:riakc_obj, :update_value, 3})}.
+  """
+  @spec update_value(t, value, content_type) :: t
+  def update_value(obj, value, content_type) do
+    :riakc_obj.update_value(obj, value, to_charlist(content_type))
+  end
+
+  @doc """
   Returns the update value of this object if there are no siblings.
 
   See #{erlang_doc_link({:riakc_obj, :get_update_value, 1})}.

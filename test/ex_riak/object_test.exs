@@ -279,7 +279,19 @@ defmodule ExRiak.ObjectTest do
         |> Object.update_value("new value")
 
       assert "new value" = Object.get_update_value!(obj)
-      assert :undefined = Object.get_content_type!(obj)
+      assert :undefined = Object.get_update_content_type!(obj)
+    end
+  end
+
+  describe "update_value/3" do
+    test "updates the value and sets the content type" do
+      obj =
+        "my_bucket"
+        |> Object.new("key", "value")
+        |> Object.update_value("new value", "text/plain")
+
+      assert "new value" = Object.get_update_value!(obj)
+      assert "text/plain" = Object.get_update_content_type!(obj)
     end
   end
 end
