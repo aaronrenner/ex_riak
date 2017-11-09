@@ -242,13 +242,17 @@ defmodule ExRiak.Object do
   @doc """
   Get specific metadata entry.
 
+  If `metadata_key` is present in the user metadata with then the associated
+  value is returned. Otherwise `default` is returned (which is `nil` unless
+  specified otherwise).
+
   See #{erlang_doc_link({:riakc_obj, :get_user_metadata_entry, 2})}.
   """
-  @spec get_user_metadata_entry(metadata, metadata_key) ::
-    metadata_value | nil
-  def get_user_metadata_entry(metadata, metadata_key) do
+  @spec get_user_metadata_entry(metadata, metadata_key, default :: term) ::
+    metadata_value | term
+  def get_user_metadata_entry(metadata, metadata_key, default \\ nil) do
     case :riakc_obj.get_user_metadata_entry(metadata, metadata_key) do
-      :notfound -> nil
+      :notfound -> default
       value -> value
     end
   end
