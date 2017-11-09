@@ -19,7 +19,9 @@ before_install:
 
 before_script:
   - sudo riak-admin bucket-type create ex_riak
+  - sudo riak-admin bucket-type create ex_riak_maps '{"props":{"datatype":"map"}}'
   - sudo riak-admin bucket-type activate ex_riak
+  - sudo riak-admin bucket-type activate ex_riak_maps
   - mix local.hex --force
   - mix deps.get --only test
   - mix deps.clean --unused

@@ -15,6 +15,7 @@ defmodule ExRiak.RiakCase do
     on_exit fn ->
       {:ok, conn} = build_connection()
       clean_bucket(conn, basic_bucket())
+      clean_bucket(conn, maps_bucket())
     end
 
     [conn: conn]
@@ -29,6 +30,10 @@ defmodule ExRiak.RiakCase do
 
   def basic_bucket do
     {"ex_riak", "ex_riak"}
+  end
+
+  def maps_bucket do
+    {"ex_riak_maps", "ex_riak"}
   end
 
   def build_connection do

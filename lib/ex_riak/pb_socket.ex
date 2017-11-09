@@ -5,6 +5,7 @@ defmodule ExRiak.PBSocket do
 
   import ExRiak.Docs
 
+  alias ExRiak.DataType
   alias ExRiak.NoValueError
   alias ExRiak.Object
   alias ExRiak.PBSocketError
@@ -142,6 +143,36 @@ defmodule ExRiak.PBSocket do
   def delete!(pid, bucket_locator, key) do
     case delete(pid, bucket_locator, key) do
       :ok -> :ok
+      {:error, error} -> raise error
+    end
+  end
+
+  @doc """
+  Fetches the representation of a convergent data type from Riak.
+
+  See #{erlang_doc_link({:riakc_pb_socket, :fetch_type, 3})}.
+  """
+  @spec fetch_type(pid, bucket_locator, key) ::
+    {:ok, DataType.t} | {:error, :not_found | PBSocketError.t}
+  def fetch_type(pid, bucket_locator, key) do
+    case :riakc_pb_socket.fetch_type(pid, bucket_locator, key) do
+      {:ok, dt} -> {:ok, dt}
+      {:error, {:notfound, _}} -> {:error, :not_found}
+      {:error, reason} -> {:error, PBSocketError.exception(reason: reason)}
+    end
+  end
+
+  @doc """
+  Fetches the representation of a convergent data type from Riak.
+
+  Returns nil if not found. Raises an `ExRiak.PBSocketError` on failure.
+  """
+  @spec fetch_type!(pid, bucket_locator, key) ::
+    DataType.t | nil | no_return
+  def fetch_type!(pid, bucket_locator, key) do
+    case fetch_type(pid, bucket_locator, key) do
+      {:ok, dt} -> dt
+      {:error, :not_found} -> nil
       {:error, error} -> raise error
     end
   end

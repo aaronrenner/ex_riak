@@ -59,7 +59,9 @@ Before running tests, you need to create a few bucket types:
 
 ```shell
 riak-admin bucket-type create ex_riak
+riak-admin bucket-type create ex_riak_maps '{"props":{"datatype":"map"}}'
 riak-admin bucket-type activate ex_riak
+riak-admin bucket-type activate ex_riak_maps
 ```
 
 After that, make sure you've got Elixir 1.5+ installed and then:

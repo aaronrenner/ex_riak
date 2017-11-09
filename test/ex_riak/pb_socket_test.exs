@@ -97,4 +97,44 @@ defmodule ExRiak.PBSocketTest do
       assert {:error, :not_found} = PBSocket.get(conn, basic_bucket(), key)
     end
   end
+
+  describe "fetching crdt types" do
+    test "when a value is found", %{conn: conn} do
+      key = random_string()
+      map = :riakc_map.new()
+      map = :riakc_map.update({"name", :register}, fn register ->
+        :riakc_register.set("Aaron", register)
+      end, map)
+      :ok =
+        :riakc_pb_socket.update_type(
+            conn,
+            maps_bucket(),
+            key,
+            :riakc_map.to_op(map)
+        )
+
+      assert {:ok, fetched_map} = PBSocket.fetch_type(conn, maps_bucket(), key)
+      assert "Aaron" = :riakc_map.fetch({"name", :register}, fetched_map)
+      assert fetched_map = PBSocket.fetch_type!(conn, maps_bucket(), key)
+      assert "Aaron" = :riakc_map.fetch({"name", :register}, fetched_map)
+    end
+
+    test "when a value is not found", %{conn: conn} do
+      key = "does not exist"
+
+      assert {:error, :not_found} =
+        PBSocket.fetch_type(conn, maps_bucket(), key)
+      refute PBSocket.fetch_type!(conn, maps_bucket(), key)
+    end
+
+    test "when there is an error", %{conn: conn} do
+      key = random_string()
+      bucket = {"unknown", "unknown"}
+
+      assert {:error, %PBSocketError{}} = PBSocket.fetch_type(conn, bucket, key)
+      assert_raise PBSocketError, fn ->
+        PBSocket.fetch_type!(conn, bucket, key)
+      end
+    end
+  end
 end
