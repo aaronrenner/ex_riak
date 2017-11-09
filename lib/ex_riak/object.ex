@@ -97,7 +97,7 @@ defmodule ExRiak.Object do
   @doc """
   Sets the updated value of an object.
 
-  See #{erlang_doc_link({:riakc_obj, :set_value, 2})}.
+  See #{erlang_doc_link({:riakc_obj, :update_value, 2})}.
   """
   @spec update_value(t, value) :: t
   def update_value(obj, value) do
