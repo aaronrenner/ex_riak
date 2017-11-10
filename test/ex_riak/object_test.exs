@@ -174,6 +174,8 @@ defmodule ExRiak.ObjectTest do
 
     assert {:ok, metadata} = Object.get_metadata(fetched_obj)
     assert ^metadata = Object.get_metadata!(fetched_obj)
+    assert {:ok, metadata} = Object.get_update_metadata(fetched_obj)
+    assert ^metadata = Object.get_update_metadata!(fetched_obj)
 
     assert metadata_entry_1 in Object.get_user_metadata_entries(metadata)
     assert metadata_entry_2 in Object.get_user_metadata_entries(metadata)
@@ -205,6 +207,11 @@ defmodule ExRiak.ObjectTest do
     assert_raise SiblingsError, fn ->
       Object.get_metadata!(fetched_obj)
     end
+
+    assert {:error, %SiblingsError{}} = Object.get_update_metadata(fetched_obj)
+    assert_raise SiblingsError, fn ->
+      Object.get_update_metadata!(fetched_obj)
+    end
   end
 
   test "with an empty riak object" do
@@ -219,7 +226,7 @@ defmodule ExRiak.ObjectTest do
     assert {:ok, :undefined} = Object.get_content_type(obj)
     assert :undefined = Object.get_update_content_type!(obj)
 
-    metadata = Object.get_update_metadata(obj)
+    {:ok, metadata} = Object.get_update_metadata(obj)
     assert [] = Object.get_user_metadata_entries(metadata)
 
     assert 0 = Object.value_count(obj)

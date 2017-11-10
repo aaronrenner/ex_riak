@@ -214,9 +214,23 @@ defmodule ExRiak.Object do
 
   See #{erlang_doc_link({:riakc_obj, :get_update_metadata, 1})}.
   """
-  @spec get_update_metadata(t) :: metadata
+  @spec get_update_metadata(t) :: {:ok, metadata} | {:error, SiblingsError.t}
   def get_update_metadata(obj) do
-    :riakc_obj.get_update_metadata(obj)
+    do_get(obj, &:riakc_obj.get_update_metadata/1)
+  end
+
+  @doc """
+  Returns the updated metadata for this object, erroring out if there are
+  siblings.
+
+  See #{erlang_doc_link({:riakc_obj, :get_update_metadata, 1})}.
+  """
+  @spec get_update_metadata!(t) :: metadata
+  def get_update_metadata!(obj) do
+    case get_update_metadata(obj) do
+      {:ok, metadata} -> metadata
+      {:error, error} -> raise error
+    end
   end
 
   @doc """
