@@ -21,6 +21,10 @@ defmodule ExRiak.ObjectTest do
     assert ^value = Object.get_update_value!(fetched_obj)
     assert {:ok, "text/plain"} = Object.get_content_type(fetched_obj)
     assert "text/plain" = Object.get_content_type!(fetched_obj)
+
+    assert [^value] = Object.get_values(fetched_obj)
+    {:ok, metadata} = Object.get_metadata(fetched_obj)
+    assert [{^metadata, ^value}] = Object.get_contents(fetched_obj)
   end
 
   test "decoding an erlang term", %{conn: conn} do
@@ -37,6 +41,10 @@ defmodule ExRiak.ObjectTest do
     assert ^value = Object.get_update_value!(fetched_obj)
     assert 1 = Object.value_count(fetched_obj)
     refute Object.siblings?(fetched_obj)
+
+    assert [^value] = Object.get_values(fetched_obj)
+    {:ok, metadata} = Object.get_metadata(fetched_obj)
+    assert [{^metadata, ^value}] = Object.get_contents(fetched_obj)
   end
 
   test "decoding an invalid erlang term", %{conn: conn} do
@@ -65,6 +73,10 @@ defmodule ExRiak.ObjectTest do
     assert_raise DecodingError, fn ->
       Object.get_update_value!(fetched_obj)
     end
+
+    assert [%DecodingError{}] = Object.get_values(fetched_obj)
+    {:ok, metadata} = Object.get_metadata(fetched_obj)
+    assert [{^metadata, %DecodingError{}}] = Object.get_contents(fetched_obj)
   end
 
   test "saving and retrieving string without a content type", %{conn: conn} do
@@ -101,11 +113,13 @@ defmodule ExRiak.ObjectTest do
 
   test "decoding a string with siblings", %{conn: conn} do
     key = random_string()
-    value = "world"
+    value_1 = "world"
+    value_2 = "universe"
     content_type = "text/plain"
-    obj = Object.new(basic_bucket(), key, value, content_type)
-    :riakc_pb_socket.put(conn, obj)
-    :riakc_pb_socket.put(conn, obj)
+    obj_1 = Object.new(basic_bucket(), key, value_1, content_type)
+    obj_2 = Object.new(basic_bucket(), key, value_2, content_type)
+    :riakc_pb_socket.put(conn, obj_1)
+    :riakc_pb_socket.put(conn, obj_2)
 
     {:ok, fetched_obj} = :riakc_pb_socket.get(conn, basic_bucket(), key)
 
@@ -129,14 +143,23 @@ defmodule ExRiak.ObjectTest do
 
     assert 2 = Object.value_count(fetched_obj)
     assert Object.siblings?(fetched_obj)
+
+    assert {metadatas, values} =
+      fetched_obj |> Object.get_contents() |> Enum.unzip
+    assert value_1 in values
+    assert value_2 in values
+    assert ^metadatas = Object.get_metadatas(fetched_obj)
+    assert ^values = Object.get_values(fetched_obj)
   end
 
   test "decoding an erlang term with siblings", %{conn: conn} do
     key = random_string()
-    value = %{name: "Aaron"}
-    obj = Object.new(basic_bucket(), key, value, 'text/plain')
-    :riakc_pb_socket.put(conn, obj)
-    :riakc_pb_socket.put(conn, obj)
+    value_1 = %{name: "Aaron"}
+    value_2 = %{name: "Amy"}
+    obj_1 = Object.new(basic_bucket(), key, value_1, 'text/plain')
+    obj_2 = Object.new(basic_bucket(), key, value_2, 'text/plain')
+    :riakc_pb_socket.put(conn, obj_1)
+    :riakc_pb_socket.put(conn, obj_2)
 
     {:ok, fetched_obj} = :riakc_pb_socket.get(conn, basic_bucket(), key)
 
@@ -152,6 +175,13 @@ defmodule ExRiak.ObjectTest do
     assert_raise SiblingsError, fn ->
       Object.get_content_type!(fetched_obj)
     end
+
+    assert {metadatas, values} =
+      fetched_obj |> Object.get_contents() |> Enum.unzip
+    assert value_1 in values
+    assert value_2 in values
+    assert ^metadatas = Object.get_metadatas(fetched_obj)
+    assert ^values = Object.get_values(fetched_obj)
   end
 
   test "decoding metadata", %{conn: conn} do
@@ -288,6 +318,38 @@ defmodule ExRiak.ObjectTest do
       assert "new value" = Object.get_update_value!(obj)
       assert :undefined = Object.get_update_content_type!(obj)
     end
+
+    test "when mistakenly trying to update value with a DecodingError" do
+      obj = Object.new("my_bucket", "key")
+      error =
+        DecodingError.exception(value: "value", content_type: "text/plain")
+
+      assert_raise ArgumentError, fn ->
+        Object.update_value(obj, error)
+      end
+    end
+  end
+
+  describe "update_value/3" do
+    test "updates the value and sets the content type" do
+      obj =
+        "my_bucket"
+        |> Object.new("key", "value")
+        |> Object.update_value("new value", "text/plain")
+
+      assert "new value" = Object.get_update_value!(obj)
+      assert "text/plain" = Object.get_update_content_type!(obj)
+    end
+
+    test "when mistakenly trying to update value with a DecodingError" do
+      obj = Object.new("my_bucket", "key")
+      error =
+        DecodingError.exception(value: "a", content_type: "a")
+
+      assert_raise ArgumentError, fn ->
+        Object.update_value(obj, error, "text/plain")
+      end
+    end
   end
 
   describe "get_user_metadata_entry/3" do
@@ -308,18 +370,6 @@ defmodule ExRiak.ObjectTest do
 
     test "value not found, with default", %{metadata: md} do
       assert "default" = Object.get_user_metadata_entry(md, "key", "default")
-    end
-  end
-
-  describe "update_value/3" do
-    test "updates the value and sets the content type" do
-      obj =
-        "my_bucket"
-        |> Object.new("key", "value")
-        |> Object.update_value("new value", "text/plain")
-
-      assert "new value" = Object.get_update_value!(obj)
-      assert "text/plain" = Object.get_update_content_type!(obj)
     end
   end
 end

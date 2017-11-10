@@ -95,11 +95,47 @@ defmodule ExRiak.Object do
   end
 
   @doc """
+  Returns a list of values for this object.
+
+  See #{erlang_doc_link({:riakc_obj, :values, 1})}.
+  """
+  @spec get_values(t) :: [value | DecodingError.t]
+  def get_values(obj) do
+    values = :riakc_obj.get_values(obj)
+    content_types = get_content_types(obj)
+
+    [values, content_types]
+    |> Enum.zip
+    |> Enum.map(fn {v, ct} ->
+        case decode_value(v, ct) do
+          {:ok, value} -> value
+          {:error, error} -> error
+        end
+      end)
+  end
+
+  @doc """
+  Returns the contents (a list of `{metadata, value` tuples) for this object.
+
+  See #{erlang_doc_link({:riakc_obj, :get_contents, 1})}.
+  """
+  @spec get_contents(t) :: [{metadata, value}]
+  def get_contents(obj) do
+    metadatas = get_metadatas(obj)
+    values = get_values(obj)
+
+    Enum.zip(metadatas, values)
+  end
+
+  @doc """
   Sets the updated value of an object.
 
   See #{erlang_doc_link({:riakc_obj, :update_value, 2})}.
   """
   @spec update_value(t, value) :: t
+  def update_value(_, %DecodingError{} = error) do
+    raise unexpected_decoding_error(error)
+  end
   def update_value(obj, value) do
     :riakc_obj.update_value(obj, value)
   end
@@ -110,6 +146,9 @@ defmodule ExRiak.Object do
   See #{erlang_doc_link({:riakc_obj, :update_value, 3})}.
   """
   @spec update_value(t, value, content_type) :: t
+  def update_value(_, %DecodingError{} = error, _) do
+    raise unexpected_decoding_error(error)
+  end
   def update_value(obj, value, content_type) do
     :riakc_obj.update_value(obj, value, to_charlist(content_type))
   end
@@ -207,6 +246,16 @@ defmodule ExRiak.Object do
       {:ok, metadata} -> metadata
       {:error, error} -> raise error
     end
+  end
+
+  @doc """
+  Return a list of metadata values for the object.
+
+  See #{erlang_doc_link({:riakc_obj, :get_metadatas, 1})}.
+  """
+  @spec get_metadatas(t) :: [metadata]
+  def get_metadatas(obj) do
+    :riakc_obj.get_metadatas(obj)
   end
 
   @doc """
@@ -391,4 +440,14 @@ defmodule ExRiak.Object do
     raise ArgumentError, "empty value for key"
   end
   defp raise_on_new_error_response(obj), do: obj
+
+  defp unexpected_decoding_error(%DecodingError{} = error) do
+    message = """
+    unexpected argument
+
+      #{inspect error}
+    """
+
+    ArgumentError.exception(message: message)
+  end
 end
