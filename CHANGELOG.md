@@ -1,3 +1,28 @@
+## Unreleased
+
+### Breaking changes
+
+#### `Object.get_update_metadata/1` now returns `{:ok, metadata}` or `{:error, SiblingError.t}` instead of just `metadata`.
+
+When there are siblings on the object, the underlying
+`:riakc_obj.get_update_metadata/1` would throw `:siblings`, making the API
+inconsistent and difficult to work with. `Object.get_update_metadata/1` now
+behaves like `Object.get_metadata/1`. There is also a new
+`Object.get_update_metadata!/1` that raises a `ExRiak.SiblingsError` if there
+is a conflict.
+
+### Features
+* New functions for working with objects
+    * `Object.get_user_metadata_entry/3`
+    * `Object.siblings?/1`
+    * `Object.update_value/3`
+    * `Object.value_count/1`
+
+* New functions for working with PBSockets
+    * `PBSocket.get!/3`
+    * `PBSocket.fetch_type!/3`
+    * `PBSocket.fetch_type/3`
+
 ## 0.2.0 (2017-11-06)
 
 ### Features
