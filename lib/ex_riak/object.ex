@@ -6,6 +6,7 @@ defmodule ExRiak.Object do
   import ExRiak.Docs
 
   alias ExRiak.DecodingError
+  alias ExRiak.Metadata
   alias ExRiak.NoValueError
   alias ExRiak.SiblingsError
 
@@ -13,8 +14,8 @@ defmodule ExRiak.Object do
   @type bucket_locator :: ExRiak.bucket_locator
   @type key :: ExRiak.key
   @type value :: term
-  @type content_type :: String.t
-  @type metadata :: :riakc_obj.metadata
+  @type content_type :: Metadata.content_type
+  @type metadata :: Metadata.t
   @type metadata_key :: String.t
   @type metadata_value :: String.t
   @type metadata_entry :: {metadata_key, metadata_value}
@@ -193,7 +194,7 @@ defmodule ExRiak.Object do
   def get_content_types(obj) do
     obj
     |> :riakc_obj.get_content_types()
-    |> Enum.map(&decode_content_type/1)
+    |> Enum.map(&Metadata.decode_content_type/1)
   end
 
   @doc """
@@ -205,7 +206,7 @@ defmodule ExRiak.Object do
     {:ok, content_type | :undefined} | {:error, SiblingsError.t}
   def get_content_type(obj) do
     with {:ok, content_type} <- do_get(obj, &:riakc_obj.get_content_type/1) do
-      {:ok, decode_content_type(content_type)}
+      {:ok, Metadata.decode_content_type(content_type)}
     end
   end
 
@@ -359,7 +360,7 @@ defmodule ExRiak.Object do
     {:ok, content_type | :undefined} | {:error, SiblingsError.t}
   def get_update_content_type(obj) do
     with {:ok, ct} <- do_get(obj, &:riakc_obj.get_update_content_type/1) do
-      {:ok, decode_content_type(ct)}
+      {:ok, Metadata.decode_content_type(ct)}
     end
   end
 
@@ -424,12 +425,6 @@ defmodule ExRiak.Object do
       {:error, DecodingError.exception(value: value, content_type: ct)}
   end
   defp decode_value(value, _), do: {:ok, value}
-
-  @spec decode_content_type(charlist | :undefined) :: String.t | :undefined
-  defp decode_content_type(:undefined), do: :undefined
-  defp decode_content_type(content_type) do
-    List.to_string(content_type)
-  end
 
   @spec raise_on_new_error_response(t | {:error, new_object_error_reasons}) ::
     t | no_return
