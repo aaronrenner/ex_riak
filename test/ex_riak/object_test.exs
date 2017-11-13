@@ -351,25 +351,4 @@ defmodule ExRiak.ObjectTest do
       end
     end
   end
-
-  describe "get_user_metadata_entry/3" do
-    setup do
-      metadata = "bucket" |> Object.new("key") |> Object.get_metadata!()
-      [metadata: metadata]
-    end
-
-    test "found value", %{metadata: md} do
-      md = Object.set_user_metadata_entry(md, {"key", "value"})
-
-      assert "value" = Object.get_user_metadata_entry(md, "key")
-    end
-
-    test "value not found, no default", %{metadata: md} do
-      refute Object.get_user_metadata_entry(md, "key")
-    end
-
-    test "value not found, with default", %{metadata: md} do
-      assert "default" = Object.get_user_metadata_entry(md, "key", "default")
-    end
-  end
 end

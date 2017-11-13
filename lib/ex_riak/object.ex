@@ -16,9 +16,6 @@ defmodule ExRiak.Object do
   @type value :: term
   @type content_type :: Metadata.content_type
   @type metadata :: Metadata.t
-  @type metadata_key :: String.t
-  @type metadata_value :: String.t
-  @type metadata_entry :: {metadata_key, metadata_value}
 
   @typep new_object_error_reasons :: {:zero_length_bucket, :zero_length_key}
 
@@ -293,63 +290,20 @@ defmodule ExRiak.Object do
     :riakc_obj.update_metadata(obj, metadata)
   end
 
-  @doc """
-  Get all metadata entries.
+  defdelegate get_user_metadata_entries(metadata),
+    to: Metadata, as: :get_user_entries
 
-  See #{erlang_doc_link({:riakc_obj, :get_user_metadata_entries, 1})}.
-  """
-  @spec get_user_metadata_entries(metadata) :: [metadata_entry]
-  def get_user_metadata_entries(metadata) do
-    :riakc_obj.get_user_metadata_entries(metadata)
-  end
+  defdelegate get_user_metadata_entry(metadata, metadata_key, default \\ nil),
+    to: Metadata, as: :get_user_entry
 
-  @doc """
-  Get specific metadata entry.
+  defdelegate set_user_metadata_entry(metadata, metadata_entry),
+    to: Metadata, as: :set_user_entry
 
-  If `metadata_key` is present in the user metadata with then the associated
-  value is returned. Otherwise `default` is returned (which is `nil` unless
-  specified otherwise).
+  defdelegate delete_user_metadata_entry(metadata, metadata_key),
+    to: Metadata, as: :delete_user_entry
 
-  See #{erlang_doc_link({:riakc_obj, :get_user_metadata_entry, 2})}.
-  """
-  @spec get_user_metadata_entry(metadata, metadata_key, default :: term) ::
-    metadata_value | term
-  def get_user_metadata_entry(metadata, metadata_key, default \\ nil) do
-    case :riakc_obj.get_user_metadata_entry(metadata, metadata_key) do
-      :notfound -> default
-      value -> value
-    end
-  end
-
-  @doc """
-  Sets a metadata entry.
-
-  See #{erlang_doc_link({:riakc_obj, :set_user_metadata_entry, 2})}.
-  """
-  @spec set_user_metadata_entry(metadata, metadata_entry) :: metadata
-  def set_user_metadata_entry(metadata, metadata_entry) do
-    :riakc_obj.set_user_metadata_entry(metadata, metadata_entry)
-  end
-
-  @doc """
-  Deletes a specific metadata entry.
-
-  See #{erlang_doc_link({:riakc_obj, :delete_user_metadata_entry, 2})}.
-  """
-  @spec delete_user_metadata_entry(metadata, metadata_key) :: metadata
-  def delete_user_metadata_entry(metadata, metadata_key) do
-    :riakc_obj.delete_user_metadata_entry(metadata, metadata_key)
-  end
-
-  @doc """
-  Clears all metadata entries.
-
-  See #{erlang_doc_link({:riakc_obj, :clear_user_metadata_entries, 1})}.
-  """
-  @spec clear_user_metadata_entries(metadata) :: metadata
-  def clear_user_metadata_entries(metadata) do
-    :riakc_obj.clear_user_metadata_entries(metadata)
-  end
+  defdelegate clear_user_metadata_entries(metadata),
+    to: Metadata, as: :clear_user_entries
 
   @doc """
   Returns the content type of the update value.
