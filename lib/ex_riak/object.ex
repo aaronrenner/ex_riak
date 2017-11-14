@@ -16,6 +16,7 @@ defmodule ExRiak.Object do
   @type value :: term
   @type content_type :: Metadata.content_type
   @type metadata :: Metadata.t
+  @type vclock :: :riakc_obj.vclock
 
   @typep new_object_error_reasons :: {:zero_length_bucket, :zero_length_key}
 
@@ -428,6 +429,50 @@ defmodule ExRiak.Object do
   """
   @spec siblings?(t) :: boolean
   def siblings?(obj), do: value_count(obj) > 1
+
+  @doc """
+  Returns the vector clock for this object.
+
+  ## Examples
+
+      iex(1)> obj = Object.new("bucket", "key")
+      ...(1)> Object.vclock(obj)
+      :undefined
+
+      iex(2)> :riakc_obj.new("bucket", "key")
+      ...(2)> |> :riakc_obj.set_vclock(<<107, 206>>)
+      ...(2)> |> Object.vclock()
+      <<107, 206>>
+
+      iex(3)> Object.new("bucket", "key")
+      ...(3)> |> Object.set_vclock(<<105, 207>>)
+      ...(3)> |> Object.vclock()
+      <<105, 207>>
+
+  See #{erlang_doc_link({:riakc_obj, :vclock, 1})}.
+  """
+  @spec vclock(t) :: vclock | :undefined
+  def vclock(obj), do: :riakc_obj.vclock(obj)
+
+  @doc """
+  Set the vector clock for this object.
+
+  ## Examples
+
+      iex(1)> Object.new("bucket", "key")
+      ...(1)> |> Object.set_vclock(<<92, 73, 34>>)
+      ...(1)> |> Object.vclock()
+      <<92, 73, 34>>
+
+      iex(2)> :riakc_obj.new("bucket", "key")
+      ...(2)> |> Object.set_vclock(<<107, 206>>)
+      ...(2)> |> :riakc_obj.vclock()
+      <<107, 206>>
+
+  See #{erlang_doc_link({:riakc_obj, :set_vclock, 2})}.
+  """
+  @spec set_vclock(t, vclock) :: t
+  def set_vclock(obj, vclock), do: :riakc_obj.set_vclock(obj, vclock)
 
   @spec do_get(t, function) ::
     {:ok, term} | {:error, SiblingsError.t, NoValueError.t}
