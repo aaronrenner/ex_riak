@@ -12,7 +12,7 @@ defmodule ExRiak.Object do
 
   @type t :: :riakc_obj.riakc_obj
   @type bucket_locator :: ExRiak.bucket_locator
-  @type key :: ExRiak.key
+  @type key :: ExRiak.key | :undefined
   @type value :: term
   @type content_type :: Metadata.content_type
   @type metadata :: Metadata.t
@@ -60,6 +60,74 @@ defmodule ExRiak.Object do
     |> :riakc_obj.new(key, value, to_charlist(content_type))
     |> raise_on_new_error_response
   end
+
+  @doc """
+  Returns the key for this object.
+
+  ## Example
+
+      iex(1)> obj = Object.new("bucket", "key")
+      ...(1)> Object.key(obj)
+      "key"
+
+  See #{erlang_doc_link({:riakc_obj, :key, 1})}.
+  """
+  @spec key(t) :: key
+  def key(obj), do: :riakc_obj.key(obj)
+
+  @doc """
+  Returns the bucket for this object.
+
+  ## Example
+
+      iex(1)> obj = Object.new("bucket", "key")
+      ...(1)> Object.bucket(obj)
+      "bucket"
+
+      iex(2)> obj = Object.new({"bucket-type","bucket"}, "key")
+      ...(2)> Object.bucket(obj)
+      {"bucket-type","bucket"}
+
+  See #{erlang_doc_link({:riakc_obj, :bucket, 1})}.
+  """
+  @spec bucket(t) :: bucket_locator
+  def bucket(obj), do: :riakc_obj.bucket(obj)
+
+  @doc """
+  Returns the bucket type for this object.
+
+  ## Example
+
+      iex(1)> obj = Object.new("bucket", "key")
+      ...(1)> Object.bucket_type(obj)
+      :undefined
+
+      iex(2)> obj = Object.new({"bucket-type","bucket"}, "key")
+      ...(2)> Object.bucket_type(obj)
+      "bucket-type"
+
+  See #{erlang_doc_link({:riakc_obj, :bucket_type, 1})}.
+  """
+  @spec bucket_type(t) :: ExRiak.bucket_type | :undefined
+  def bucket_type(obj), do: :riakc_obj.bucket_type(obj)
+
+  @doc """
+  Returns only the bucket name for this object
+
+  ## Example
+
+      iex(1)> obj = Object.new("bucket", "key")
+      ...(1)> Object.only_bucket(obj)
+      "bucket"
+
+      iex(2)> obj = Object.new({"bucket-type","bucket"}, "key")
+      ...(2)> Object.only_bucket(obj)
+      "bucket"
+
+  See #{erlang_doc_link({:riakc_obj, :only_bucket, 1})}.
+  """
+  @spec only_bucket(t) :: ExRiak.bucket
+  def only_bucket(obj), do: :riakc_obj.only_bucket(obj)
 
   @doc """
   Returns the value of the object if there are no siblings.

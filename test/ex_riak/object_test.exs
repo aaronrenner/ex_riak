@@ -7,6 +7,8 @@ defmodule ExRiak.ObjectTest do
   alias ExRiak.PBSocket
   alias ExRiak.SiblingsError
 
+  doctest Object
+
   test "decoding a string", %{conn: conn} do
     key = random_string()
     value = "world"
