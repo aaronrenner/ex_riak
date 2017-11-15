@@ -1,5 +1,8 @@
 ## Unreleased
 
+This release adds a lot of functions to support Riak's non-crdt conflict
+resolutions.
+
 ### Breaking changes
 
 #### `Object.get_update_metadata/1` now returns `{:ok, metadata}` or `{:error, SiblingError.t}` instead of just `metadata`.
@@ -13,15 +16,32 @@ is a conflict.
 
 ### Features
 * New functions for working with objects
+    * `Object.bucket/1`
+    * `Object.bucket_type/1`
+    * `Object.get_contents/1`
+    * `Object.get_metadatas/1`
     * `Object.get_user_metadata_entry/3`
+    * `Object.get_values/1`
+    * `Object.key/1`
     * `Object.siblings?/1`
+    * `Object.set_vclock/2`
+    * `Object.only_bucket/1`
     * `Object.update_value/3`
     * `Object.value_count/1`
+    * `Object.vclock/1`
 
 * New functions for working with PBSockets
     * `PBSocket.get!/3`
     * `PBSocket.fetch_type!/3`
     * `PBSocket.fetch_type/3`
+
+* New Metadata module for working with metadata objects
+    * `Metadata.get_content_type/1`
+    * `Metadata.clear_user_entries/1`
+    * `Metadata.delete_user_entry/2`
+    * `Metadata.get_user_entries/1`
+    * `Metadata.get_user_entry/1`
+    * `Metadata.set_user_entry/2`
 
 ## 0.2.0 (2017-11-06)
 
