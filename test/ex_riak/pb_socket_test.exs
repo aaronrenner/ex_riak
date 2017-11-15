@@ -137,4 +137,32 @@ defmodule ExRiak.PBSocketTest do
       end
     end
   end
+
+  describe "listing keys" do
+    test "when everything goes right", %{conn: conn} do
+      bucket_locator = basic_bucket()
+      clean_bucket(conn, bucket_locator)
+
+      {:ok, []} = PBSocket.list_keys(conn, bucket_locator)
+      [] = PBSocket.list_keys!(conn, bucket_locator)
+
+      key = random_string()
+      obj = Object.new(bucket_locator, key, "val")
+      PBSocket.put!(conn, obj)
+
+      {:ok, [^key]} = PBSocket.list_keys(conn, bucket_locator)
+      [^key] = PBSocket.list_keys!(conn, bucket_locator)
+    end
+
+    test "when bucket type doesn't exist", %{conn: conn} do
+      bucket_locator = {"apf-invalid", "bucket"}
+
+      assert {:error, %PBSocketError{}} =
+        PBSocket.list_keys(conn, bucket_locator)
+
+      assert_raise PBSocketError, fn ->
+        PBSocket.list_keys!(conn, bucket_locator)
+      end
+    end
+  end
 end

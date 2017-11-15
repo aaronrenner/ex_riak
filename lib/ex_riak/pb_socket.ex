@@ -178,6 +178,40 @@ defmodule ExRiak.PBSocket do
     end
   end
 
+  @doc """
+  Lists all keys in a bucket.
+
+  *This is a potentially expensive operation and should not be used in
+  production.*
+
+  See #{erlang_doc_link({:riakc_pb_socket, :list_keys, 2})}.
+  """
+  @spec list_keys(t, bucket_locator) :: {:ok, [key]} | {:error, PBSocketError.t}
+  def list_keys(pid, bucket_locator) do
+    case :riakc_pb_socket.list_keys(pid, bucket_locator) do
+      {:ok, keys} -> {:ok, keys}
+      {:error, reason} -> {:error, PBSocketError.exception(reason: reason)}
+    end
+  end
+
+  @doc """
+  Lists all keys in a bucket.
+
+  Raises an `ExRiak.PBSocketError` on failure.
+
+  *This is a potentially expensive operation and should not be used in
+  production.*
+
+  See #{erlang_doc_link({:riakc_pb_socket, :list_keys, 2})}.
+  """
+  @spec list_keys!(t, bucket_locator) :: [key] | no_return
+  def list_keys!(pid, bucket_locator) do
+    case list_keys(pid, bucket_locator) do
+      {:ok, keys} -> keys
+      {:error, error} -> raise error
+    end
+  end
+
   @spec default_hostname :: String.t
   defp default_hostname do
     Application.get_env(:ex_riak, :default_hostname, "localhost")
