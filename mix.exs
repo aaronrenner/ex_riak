@@ -1,7 +1,7 @@
 defmodule ExRiak.Mixfile do
   use Mix.Project
 
-  @version "0.2.0"
+  @version "0.3.0"
   @maintainers ["Aaron Renner"]
   @source_url "https://github.com/aaronrenner/ex_riak"
 
@@ -55,7 +55,7 @@ defmodule ExRiak.Mixfile do
   end
 
   defp description do
-    "A simple wrapper around riak-erlang-client, designed to let you follow Elixir coding conventions."
+    "Simple wrapper for riakc (riak-erlang-client)"
   end
 
   defp package do

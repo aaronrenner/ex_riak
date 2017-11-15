@@ -1,4 +1,4 @@
-## Unreleased
+## 0.3.0 (2017-11-14)
 
 This release adds a lot of functions to support Riak's non-crdt conflict
 resolutions.
