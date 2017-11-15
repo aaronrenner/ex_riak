@@ -167,6 +167,8 @@ defmodule ExRiak.PBSocket do
   Fetches the representation of a convergent data type from Riak.
 
   Returns nil if not found. Raises an `ExRiak.PBSocketError` on failure.
+
+  See #{erlang_doc_link({:riakc_pb_socket, :fetch_type, 3})}.
   """
   @spec fetch_type!(t, bucket_locator, key) ::
     DataType.t | nil | no_return
