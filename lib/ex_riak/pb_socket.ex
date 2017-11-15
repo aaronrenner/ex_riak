@@ -11,9 +11,10 @@ defmodule ExRiak.PBSocket do
   alias ExRiak.PBSocketError
   alias ExRiak.SiblingsError
 
+  @type t :: pid
+
   @type bucket_locator :: ExRiak.bucket_locator
   @type key :: ExRiak.key
-
   @type port_number :: 0..65_535
 
   @type start_link_opt ::
@@ -50,7 +51,7 @@ defmodule ExRiak.PBSocket do
 
   See #{erlang_doc_link({:riakc_pb_socket, :get, 3})}.
   """
-  @spec get(pid, bucket_locator, key) ::
+  @spec get(t, bucket_locator, key) ::
     {:ok, Object.t} | {:error, :not_found | PBSocketError.t}
   def get(client, bucket_locator, key) do
     case :riakc_pb_socket.get(client, bucket_locator, key) do
@@ -78,7 +79,7 @@ defmodule ExRiak.PBSocket do
 
   [update-cycle]: http://docs.basho.com/riak/kv/2.2.3/developing/usage/updating-objects/
   """
-  @spec get!(pid, bucket_locator, key) :: Object.t | nil | no_return
+  @spec get!(t, bucket_locator, key) :: Object.t | nil | no_return
   def get!(client, bucket_locator, key) do
     case get(client, bucket_locator, key) do
       {:ok, obj} -> obj
@@ -92,7 +93,7 @@ defmodule ExRiak.PBSocket do
 
   See #{erlang_doc_link({:riakc_pb_socket, :put, 2})}.
   """
-  @spec put(pid, Object.t) ::
+  @spec put(t, Object.t) ::
     :ok | {:ok, Object.t} | {:error, PBSocketError.t | SiblingsError.t}
   def put(client, obj) do
     case :riakc_pb_socket.put(client, obj) do
@@ -111,7 +112,7 @@ defmodule ExRiak.PBSocket do
 
   See #{erlang_doc_link({:riakc_pb_socket, :put, 2})}.
   """
-  @spec put!(pid, Object.t) ::
+  @spec put!(t, Object.t) ::
     :ok | Object.t
   def put!(client, obj) do
     case put(client, obj) do
@@ -126,7 +127,7 @@ defmodule ExRiak.PBSocket do
 
   See #{erlang_doc_link({:riakc_pb_socket, :delete, 3})}.
   """
-  @spec delete(pid, bucket_locator, key) :: :ok | {:error, PBSocketError.t}
+  @spec delete(t, bucket_locator, key) :: :ok | {:error, PBSocketError.t}
   def delete(pid, bucket_locator, key) do
     case :riakc_pb_socket.delete(pid, bucket_locator, key) do
       :ok -> :ok
@@ -139,7 +140,7 @@ defmodule ExRiak.PBSocket do
 
   See #{erlang_doc_link({:riakc_pb_socket, :delete, 3})}.
   """
-  @spec delete!(pid, bucket_locator, key) :: :ok | no_return
+  @spec delete!(t, bucket_locator, key) :: :ok | no_return
   def delete!(pid, bucket_locator, key) do
     case delete(pid, bucket_locator, key) do
       :ok -> :ok
@@ -152,7 +153,7 @@ defmodule ExRiak.PBSocket do
 
   See #{erlang_doc_link({:riakc_pb_socket, :fetch_type, 3})}.
   """
-  @spec fetch_type(pid, bucket_locator, key) ::
+  @spec fetch_type(t, bucket_locator, key) ::
     {:ok, DataType.t} | {:error, :not_found | PBSocketError.t}
   def fetch_type(pid, bucket_locator, key) do
     case :riakc_pb_socket.fetch_type(pid, bucket_locator, key) do
@@ -167,7 +168,7 @@ defmodule ExRiak.PBSocket do
 
   Returns nil if not found. Raises an `ExRiak.PBSocketError` on failure.
   """
-  @spec fetch_type!(pid, bucket_locator, key) ::
+  @spec fetch_type!(t, bucket_locator, key) ::
     DataType.t | nil | no_return
   def fetch_type!(pid, bucket_locator, key) do
     case fetch_type(pid, bucket_locator, key) do
