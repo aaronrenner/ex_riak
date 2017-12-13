@@ -7,6 +7,14 @@ defmodule ExRiak.PBSocketTest do
   alias ExRiak.PBSocketError
   alias ExRiak.SiblingsError
 
+  test "start_link/1 with client options" do
+    # This would not start if the auto_reconnect option was not passed through
+    {:ok, conn} =
+      PBSocket.start_link(hostname: 'does_not_exist', auto_reconnect: true)
+
+    assert {false, _} = :riakc_pb_socket.is_connected(conn)
+  end
+
   describe "get/3" do
     test "when an object is found", %{conn: conn} do
       key = random_string()

@@ -19,7 +19,15 @@ defmodule ExRiak.PBSocket do
 
   @type start_link_opt ::
     {:hostname, String.t} |
-    {:port, port_number}
+    {:port, port_number} |
+    :queue_if_disconnected |
+    {:queue_if_disconnected, boolean} |
+    {:connect_timeout, pos_integer} |
+    :auto_reconnect |
+    {:auto_reconnect, boolean} |
+    :keepalive |
+    {:keepalive, boolean}
+
   @type start_link_opts :: [start_link_opt]
 
   @doc """
@@ -41,9 +49,9 @@ defmodule ExRiak.PBSocket do
   @spec start_link(start_link_opts) :: GenServer.on_start
   def start_link(opts \\ []) do
     {hostname, opts} = Keyword.pop_lazy(opts, :hostname, &default_hostname/0)
-    {port, _opts} = Keyword.pop_lazy(opts, :port, &default_port/0)
+    {port, opts} = Keyword.pop_lazy(opts, :port, &default_port/0)
 
-    :riakc_pb_socket.start_link(to_charlist(hostname), port)
+    :riakc_pb_socket.start_link(to_charlist(hostname), port, opts)
   end
 
   @doc """
