@@ -17,9 +17,7 @@ defmodule ExRiak.PBSocket do
   @type key :: ExRiak.key
   @type port_number :: 0..65_535
 
-  @type start_link_opt ::
-    {:hostname, String.t} |
-    {:port, port_number} |
+  @type client_opt ::
     :queue_if_disconnected |
     {:queue_if_disconnected, boolean} |
     {:connect_timeout, pos_integer} |
@@ -27,6 +25,13 @@ defmodule ExRiak.PBSocket do
     {:auto_reconnect, boolean} |
     :keepalive |
     {:keepalive, boolean}
+
+  @type client_opts :: [client_opt]
+
+  @type start_link_opt ::
+    {:hostname, String.t} |
+    {:port, port_number} |
+    client_opt
 
   @type start_link_opts :: [start_link_opt]
 
