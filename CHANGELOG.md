@@ -1,3 +1,13 @@
+## 0.3.1 (2018-01-08)
+
+### Features
+
+* New functions for working with PBSockets
+    * `PBSocket.list_keys/2`
+    * `PBSocket.list_keys!/2`
+* Allow additional options to be passed to `PBSocket.start_link/1`.
+* Typespec updates.
+
 ## 0.3.0 (2017-11-14)
 
 This release adds a lot of functions to support Riak's non-crdt conflict
