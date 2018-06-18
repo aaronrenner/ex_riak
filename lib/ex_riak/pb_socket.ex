@@ -8,6 +8,7 @@ defmodule ExRiak.PBSocket do
   alias ExRiak.DataType
   alias ExRiak.NoValueError
   alias ExRiak.Object
+  alias ExRiak.IndexResults
   alias ExRiak.PBSocketError
   alias ExRiak.SiblingsError
 
@@ -15,6 +16,8 @@ defmodule ExRiak.PBSocket do
 
   @type bucket_locator :: ExRiak.bucket_locator
   @type key :: ExRiak.key
+  @type index :: ExRiak.index
+  @type binary_index_value :: ExRiak.binary_index_value
   @type port_number :: 0..65_535
 
   @type client_opt ::
@@ -34,6 +37,17 @@ defmodule ExRiak.PBSocket do
     client_opt
 
   @type start_link_opts :: [start_link_opt]
+
+  @type index_opt ::
+    {:timeout, timeout()} |
+    {:call_timeout, timeout()} |
+    {:stream, boolean()} |
+    {:continuation, binary()} |
+    {:pagination_sort, boolean()} |
+    {:max_results, non_neg_integer() | :all}
+
+  @type index_opts :: [index_opt]
+
 
   @doc """
   Creates a linked process to communicate with the riak server.
@@ -98,6 +112,22 @@ defmodule ExRiak.PBSocket do
       {:ok, obj} -> obj
       {:error, :not_found} -> nil
       {:error, error} -> raise error
+    end
+  end
+
+  @doc """
+  Gets a list of keys for the given index from server.
+
+  See #{erlang_doc_link({:riakc_pb_socket, :get_index_eq, 5})}.
+  """
+  @spec get_binary_index_eq(t, bucket_locator, index, binary_index_value, index_opts) ::
+  {:ok, IndexResults.t} | {:error, PBSocketError.t}
+
+  def get_binary_index_eq(client, bucket_locator, name, value, opts \\ []) when is_binary(value) do
+    name = :erlang.binary_to_list(name)
+    case :riakc_pb_socket.get_index_eq(client, bucket_locator, {:binary_index, name}, value, opts) do
+      {:ok, results} -> {:ok, IndexResults.to_struct(results)}
+      {:error, reason} -> {:error, PBSocketError.exception(reason: reason)}
     end
   end
 

@@ -72,4 +72,18 @@ defmodule ExRiak.MetadataTest do
       assert "default" = Object.get_user_metadata_entry(md, "key", "default")
     end
   end
+
+  describe "indexes" do
+    setup do
+      metadata = "bucket" |> Object.new("key") |> Object.get_metadata!()
+      [metadata: metadata]
+    end
+
+    test "can set indexes", %{metadata: metadata} do
+      indexes = [{{:binary_index, "valid_accounts"}, ["abc", "def"]}]
+      metadata = Metadata.set_secondary_index(metadata, indexes)
+
+      assert ["abc", "def"] == :riakc_obj.get_secondary_index(metadata, {:binary_index, "valid_accounts"})
+    end
+  end
 end
