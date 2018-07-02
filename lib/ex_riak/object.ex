@@ -381,6 +381,22 @@ defmodule ExRiak.Object do
 
   defdelegate clear_user_metadata_entries(metadata), to: Metadata, as: :clear_user_entries
 
+  defdelegate get_secondary_indexes(metadata), to: Metadata, as: :get_secondary_indexes
+
+  defdelegate get_secondary_index(metadata, secondary_index_id, default \\ nil),
+    to: Metadata,
+    as: :get_secondary_index
+
+  defdelegate add_secondary_index(metadata, index), to: Metadata, as: :add_secondary_index
+
+  defdelegate set_secondary_index(metadata, index), to: Metadata, as: :set_secondary_index
+
+  defdelegate delete_secondary_index(metadata, secondary_index_id),
+    to: Metadata,
+    as: :delete_secondary_index
+
+  defdelegate clear_secondary_indexes(metadata), to: Metadata, as: :clear_secondary_indexes
+
   @doc """
   Returns the content type of the update value.
 
