@@ -9,6 +9,9 @@ defmodule ExRiak.Metadata do
   @type key :: String.t
   @type value :: String.t
   @type entry :: {key, value}
+  @type index :: {{:binary_index, String.t}, [binary(), ...]} |
+                 {{:integer_index, String.t}, [integer(), ...]}
+  @type indexes :: [index, ...]
 
   @typedoc """
   Content type of an `ExRiak.Object`'s value
@@ -86,6 +89,16 @@ defmodule ExRiak.Metadata do
   @spec clear_user_entries(t) :: t
   def clear_user_entries(metadata) do
     :riakc_obj.clear_user_metadata_entries(metadata)
+  end
+
+  @doc """
+  Sets secondary indexes. Note that this overwrites current index values.
+
+  See #{erlang_doc_link({:riakc_obj, :set_secondary_index, 2})}.
+  """
+  @spec set_secondary_index(t, any()) :: t
+  def set_secondary_index(metadata, indexes) do
+    :riakc_obj.set_secondary_index(metadata, indexes)
   end
 
   @doc false

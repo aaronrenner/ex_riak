@@ -381,6 +381,9 @@ defmodule ExRiak.Object do
   defdelegate clear_user_metadata_entries(metadata),
     to: Metadata, as: :clear_user_entries
 
+  defdelegate set_secondary_index(metadata, index),
+    to: Metadata, as: :set_secondary_index
+
   @doc """
   Returns the content type of the update value.
 

@@ -46,6 +46,32 @@ defmodule ExRiak.PBSocketTest do
     end
   end
 
+  describe "get_binary_index_eq/5" do
+    test "when the index has values", %{conn: conn} do
+      value = "world"
+
+      index = "things i've said hello to"
+      index_value = "planets"
+
+      obj = Object.new(basic_bucket(), :undefined, value, 'text/plain')
+
+      md =
+        obj
+        |> ExRiak.Object.get_update_metadata!
+        |> ExRiak.Object.set_secondary_index([{{:binary_index, index}, [index_value]}])
+
+      obj = ExRiak.Object.update_metadata(obj, md)
+
+      {:ok, key} = PBSocket.put(conn, obj)
+      {:ok, another_key} = PBSocket.put(conn, obj)
+
+      {:ok, result} = PBSocket.get_binary_index_eq(conn, basic_bucket(), index, index_value)
+
+      assert %ExRiak.IndexResults{keys: keys} = result
+      assert Enum.sort(keys) == Enum.sort([key, another_key])
+    end
+  end
+
   test "trying to update an object with siblings", %{conn: conn} do
     key = random_string()
     value = "world"

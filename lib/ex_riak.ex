@@ -42,4 +42,14 @@ defmodule ExRiak do
   Riak object key
   """
   @type key :: String.t
+
+  @typedoc """
+  Riak index name
+  """
+  @type index :: String.t
+
+  @typedoc """
+  Riak index binary value
+  """
+  @type binary_index_value :: String.t
 end
