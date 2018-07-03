@@ -5,7 +5,7 @@ defmodule ExRiak.Metadata do
 
   import ExRiak.Docs
 
-  @secondary_index_types [:binary_index, :integer_index]
+  alias ExRiak.SecondaryIndex
 
   @type t :: :riakc_obj.metadata()
   @type key :: String.t()
@@ -14,16 +14,13 @@ defmodule ExRiak.Metadata do
   @type entry :: {key, value}
 
   @type secondary_index :: binary_index | integer_index
-  @type secondary_index_id :: binary_index_id | integer_index_id
-  @type secondary_index_value :: binary_index_value | integer_index_value
+  @type secondary_index_id :: SecondaryIndex.index_id()
+  @type secondary_index_value :: SecondaryIndex.index_value()
 
-  @type binary_index :: {binary_index_id, [binary_index_value]}
-  @type binary_index_id :: {:binary_index, String.t()}
-  @type binary_index_value :: String.t()
+  @type binary_index :: {SecondaryIndex.binary_index_id(), [SecondaryIndex.binary_index_value()]}
 
-  @type integer_index :: {integer_index_id, [integer_index_value]}
-  @type integer_index_id :: {:integer_index, String.t()}
-  @type integer_index_value :: integer()
+  @type integer_index ::
+          {SecondaryIndex.integer_index_id(), [SecondaryIndex.integer_index_value()]}
 
   @typedoc """
   Content type of an `ExRiak.Object`'s value
@@ -113,7 +110,7 @@ defmodule ExRiak.Metadata do
     metadata
     |> :riakc_obj.get_secondary_indexes()
     |> Enum.map(fn {id, values} ->
-      {decode_secondary_index_id(id), values}
+      {SecondaryIndex.decode_secondary_index_id(id), values}
     end)
   end
 
@@ -129,7 +126,7 @@ defmodule ExRiak.Metadata do
   @spec get_secondary_index(t, secondary_index_id, default :: term()) ::
           [secondary_index_value] | term()
   def get_secondary_index(metadata, secondary_index_id, default \\ nil) do
-    secondary_index_id = encode_secondary_index_id(secondary_index_id)
+    secondary_index_id = SecondaryIndex.encode_secondary_index_id(secondary_index_id)
 
     case :riakc_obj.get_secondary_index(metadata, secondary_index_id) do
       :notfound -> default
@@ -166,7 +163,7 @@ defmodule ExRiak.Metadata do
   """
   @spec delete_secondary_index(t, secondary_index_id) :: t
   def delete_secondary_index(metadata, secondary_index_id) do
-    secondary_index_id = encode_secondary_index_id(secondary_index_id)
+    secondary_index_id = SecondaryIndex.encode_secondary_index_id(secondary_index_id)
     :riakc_obj.delete_secondary_index(metadata, secondary_index_id)
   end
 
@@ -186,16 +183,5 @@ defmodule ExRiak.Metadata do
 
   def decode_content_type(content_type) do
     List.to_string(content_type)
-  end
-
-  @spec encode_secondary_index_id({atom, String.t()}) :: {atom, charlist}
-  defp encode_secondary_index_id({type, string})
-       when type in @secondary_index_types and is_binary(string) do
-    {type, String.to_charlist(string)}
-  end
-
-  @spec decode_secondary_index_id({atom, charlist}) :: secondary_index_id
-  defp decode_secondary_index_id({type, name}) do
-    {type, List.to_string(name)}
   end
 end

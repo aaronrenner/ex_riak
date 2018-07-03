@@ -5,6 +5,7 @@ defmodule ExRiak.PBSocketTest do
   alias ExRiak.Object
   alias ExRiak.PBSocket
   alias ExRiak.PBSocketError
+  alias ExRiak.SecondaryIndex.Result
   alias ExRiak.SiblingsError
 
   test "start_link/1 with client options" do
@@ -195,5 +196,78 @@ defmodule ExRiak.PBSocketTest do
         PBSocket.list_keys!(conn, bucket_locator)
       end
     end
+  end
+
+  describe "get_index_eq/5" do
+    test "looking up objects with a secondary index", %{conn: conn} do
+      bucket = basic_leveldb_bucket()
+      parent_index = {:binary_index, "parentnames"}
+
+      obj = Object.new(bucket, :undefined, "value", "text/plain")
+
+      {:ok, obj_1_key} = obj |> set_2i(parent_index, ["Bill", "Sarah"]) |> put_obj(conn)
+      {:ok, obj_2_key} = obj |> set_2i(parent_index, ["Bill", "Heidi"]) |> put_obj(conn)
+      {:ok, obj_3_key} = obj |> set_2i(parent_index, ["Heidi"]) |> put_obj(conn)
+
+      {:ok, %Result{keys: keys, continuation: :undefined, terms: :undefined}} =
+        PBSocket.get_index_eq(conn, bucket, parent_index, "Bill")
+
+      assert Enum.sort(keys) == Enum.sort([obj_1_key, obj_2_key])
+
+      {:ok, %Result{keys: keys, continuation: :undefined, terms: :undefined}} =
+        PBSocket.get_index_eq(conn, bucket, parent_index, "Heidi")
+
+      assert Enum.sort(keys) == Enum.sort([obj_2_key, obj_3_key])
+    end
+  end
+
+  describe "get_index_range/6" do
+    test "looking up objects with a secondary index", %{conn: conn} do
+      bucket = basic_leveldb_bucket()
+      age_index = {:integer_index, "age"}
+
+      obj = Object.new(bucket, :undefined)
+
+      {:ok, _fred_key} =
+        obj
+        |> set_2i(age_index, [2])
+        |> Object.update_value("Fred")
+        |> put_obj(conn)
+
+      {:ok, lucy_key} =
+        obj
+        |> set_2i(age_index, [8])
+        |> Object.update_value("Lucy")
+        |> put_obj(conn)
+
+      {:ok, david_key} =
+        obj
+        |> set_2i(age_index, [6])
+        |> Object.update_value("David")
+        |> put_obj(conn)
+
+      {:ok, %Result{keys: keys, continuation: :undefined, terms: :undefined}} =
+        PBSocket.get_index_range(conn, bucket, age_index, 3, 10)
+
+      assert Enum.sort(keys) == Enum.sort([lucy_key, david_key])
+
+      {:ok, %Result{keys: :undefined, continuation: :undefined, terms: terms}} =
+        PBSocket.get_index_range(conn, bucket, age_index, 3, 10, return_terms: true)
+
+      assert Enum.sort(terms) == Enum.sort([{"8", lucy_key}, {"6", david_key}])
+    end
+  end
+
+  defp set_2i(obj, index, values) do
+    md =
+      obj
+      |> Object.get_update_metadata!()
+      |> Object.set_secondary_index({index, values})
+
+    Object.update_metadata(obj, md)
+  end
+
+  defp put_obj(obj, conn) do
+    PBSocket.put(conn, obj)
   end
 end

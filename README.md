@@ -55,14 +55,28 @@ More information on these modules is available in the
 
 ### Running tests
 
-Before running tests, you need to create a few bucket types:
+Before running tests, you need will need to update your riak setup:
 
-```shell
-riak-admin bucket-type create ex_riak
-riak-admin bucket-type create ex_riak_maps '{"props":{"datatype":"map"}}'
-riak-admin bucket-type activate ex_riak
-riak-admin bucket-type activate ex_riak_maps
-```
+1. Update your `riak.conf` to set up the appropriate backend. (If riak was
+   installed with homebrew, the riak config file will be at
+    `/usr/local/Cellar/riak/2.2.3/libexec/etc/riak.conf`.) Replace the line
+    containing `storage_backend` with the following:
+
+        storage_backend = multi
+
+        multi_backend.ex_riak_leveldb.storage_backend = leveldb
+        multi_backend.ex_riak_leveldb.leveldb.data_root = $(platform_data_dir)/ex_riak_leveldb
+
+2. Run `riak start`.
+3. Run the following commands to create the ExRiak bucket types.
+    ```shell
+    riak-admin bucket-type create ex_riak
+    riak-admin bucket-type create ex_riak_maps '{"props":{"datatype":"map"}}'
+    riak-admin bucket-type create ex_riak_leveldb '{"props":{"backend":"ex_riak_leveldb"}}'
+    riak-admin bucket-type activate ex_riak
+    riak-admin bucket-type activate ex_riak_maps
+    riak-admin bucket-type activate ex_riak_leveldb
+    ```
 
 After that, make sure you've got Elixir 1.5+ installed and then:
 

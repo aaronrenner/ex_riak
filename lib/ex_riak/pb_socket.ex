@@ -9,6 +9,8 @@ defmodule ExRiak.PBSocket do
   alias ExRiak.NoValueError
   alias ExRiak.Object
   alias ExRiak.PBSocketError
+  alias ExRiak.SecondaryIndex
+  alias ExRiak.SecondaryIndex.Result
   alias ExRiak.SiblingsError
 
   @type t :: pid
@@ -28,12 +30,28 @@ defmodule ExRiak.PBSocket do
 
   @type client_opts :: [client_opt]
 
+  @type index_opt ::
+          {:timeout, timeout()}
+          | {:call_timeout, timeout()}
+          | {:stream, boolean()}
+          | {:continuation, SecondaryIndex.continuation()}
+          | {:pagination_sort, binary()}
+          | {:max_results, non_neg_integer()}
+          | :all
+
+  @type range_index_opt ::
+          {:return_terms, boolean()}
+          | index_opt
+
   @type start_link_opt ::
           {:hostname, String.t()}
           | {:port, port_number}
           | client_opt
 
   @type start_link_opts :: [start_link_opt]
+
+  @type secondary_index_id :: SecondaryIndex.index_id()
+  @type secondary_index_value :: SecondaryIndex.index_value()
 
   @doc """
   Creates a linked process to communicate with the riak server.
@@ -225,6 +243,51 @@ defmodule ExRiak.PBSocket do
     case list_keys(pid, bucket_locator) do
       {:ok, keys} -> keys
       {:error, error} -> raise error
+    end
+  end
+
+  @doc """
+  Execute a secondary index query.
+
+  See #{erlang_doc_link({:riakc_pb_socket, :get_index_eq, 5})}.
+  """
+  @spec get_index_eq(t, bucket_locator, secondary_index_id, secondary_index_value, [index_opt]) ::
+          {:ok, Result.t()} | {:error, PBSocketError.t()}
+  def get_index_eq(pid, bucket_locator, index_id, key, opts \\ []) do
+    index_id = SecondaryIndex.encode_secondary_index_id(index_id)
+
+    case :riakc_pb_socket.get_index_eq(pid, bucket_locator, index_id, key, opts) do
+      {:ok, record} -> {:ok, Result.from_record(record)}
+      {:error, reason} -> {:error, PBSocketError.exception(reason: reason)}
+    end
+  end
+
+  @doc """
+  Execute a secondary index range query.
+
+  See #{erlang_doc_link({:riakc_pb_socket, :get_index_range, 6})}.
+  """
+  @spec get_index_range(
+          t,
+          bucket_locator,
+          secondary_index_id,
+          secondary_index_value,
+          secondary_index_value,
+          [range_index_opt]
+        ) :: {:ok, Result.t()} | {:error, PBSocketError.t()}
+  def get_index_range(pid, bucket_locator, index_id, start_value, end_value, opts \\ []) do
+    index_id = SecondaryIndex.encode_secondary_index_id(index_id)
+
+    case :riakc_pb_socket.get_index_range(
+           pid,
+           bucket_locator,
+           index_id,
+           start_value,
+           end_value,
+           opts
+         ) do
+      {:ok, record} -> {:ok, Result.from_record(record)}
+      {:error, reason} -> {:error, PBSocketError.exception(reason: reason)}
     end
   end
 
