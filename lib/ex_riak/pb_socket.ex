@@ -104,14 +104,18 @@ defmodule ExRiak.PBSocket do
   @doc """
   Puts the metadata/value in the object under the bucket/key.
 
+  When the object's key is `:undefined`, riak will generate a key for this
+  object and that key will be returned as a `{:ok, key}` tuple. If the object's
+  key is already set, `:ok` will be returned.
+
   See #{erlang_doc_link({:riakc_pb_socket, :put, 2})}.
   """
   @spec put(t, Object.t) ::
-    :ok | {:ok, Object.t} | {:error, PBSocketError.t | SiblingsError.t}
+    :ok | {:ok, key} | {:error, PBSocketError.t | SiblingsError.t}
   def put(client, obj) do
     case :riakc_pb_socket.put(client, obj) do
       :ok -> :ok
-      {:ok, obj} -> {:ok, obj}
+      {:ok, key} when is_binary(key) -> {:ok, key}
       {:error, reason} -> {:error, PBSocketError.exception(reason: reason)}
     end
   catch
@@ -123,10 +127,10 @@ defmodule ExRiak.PBSocket do
   Puts the metadata/value in the object under the bucket/key and raises on
   failure.
 
-  See #{erlang_doc_link({:riakc_pb_socket, :put, 2})}.
+  See `put/2` for more details.
   """
   @spec put!(t, Object.t) ::
-    :ok | Object.t
+    :ok | {:ok, key} | no_return
   def put!(client, obj) do
     case put(client, obj) do
       :ok -> :ok

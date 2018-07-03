@@ -12,6 +12,13 @@ defmodule ExRiak.Object do
 
   @type t :: :riakc_obj.riakc_obj
   @type bucket_locator :: ExRiak.bucket_locator
+
+  @typedoc """
+  The binary value to use as this object's key.
+
+  Can also be set to `:undefined` to have riak generate a key
+  when the object is stored. See `ExRiak.PBSocket.put/2`.
+  """
   @type key :: ExRiak.key | :undefined
   @type value :: term
   @type content_type :: Metadata.content_type

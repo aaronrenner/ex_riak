@@ -68,6 +68,26 @@ defmodule ExRiak.PBSocketTest do
     assert_raise NoValueError, fn -> PBSocket.put!(conn, obj) end
   end
 
+  test "putting an object with an :undefined key returns the generated key", %{conn: conn} do
+    obj = Object.new(basic_bucket(), :undefined, "value", "text/plain")
+
+    assert {:ok, returned} = PBSocket.put(conn, obj)
+    assert is_binary(returned)
+
+    assert returned = PBSocket.put!(conn, obj)
+    assert is_binary(returned)
+  end
+
+  test "putting an object with a set key", %{conn: conn} do
+    key = random_string()
+    obj = Object.new(basic_bucket(), key, "value")
+    assert :ok = PBSocket.put(conn, obj)
+
+    key = random_string()
+    obj = Object.new(basic_bucket(), key, "value")
+    assert :ok = PBSocket.put!(conn, obj)
+  end
+
   describe "delete/3" do
     test "deleting an object that exists in the db", %{conn: conn} do
       key = random_string()
