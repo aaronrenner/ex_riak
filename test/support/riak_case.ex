@@ -1,4 +1,5 @@
 defmodule ExRiak.RiakCase do
+  @moduledoc false
   use ExUnit.CaseTemplate
 
   alias ExRiak.PBSocket

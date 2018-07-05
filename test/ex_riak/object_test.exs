@@ -137,11 +137,13 @@ defmodule ExRiak.ObjectTest do
     assert_raise SiblingsError, fn ->
       Object.get_content_type!(fetched_obj)
     end
-    assert {:error, %SiblingsError{}} = Object.get_update_content_type(fetched_obj)
+    assert {:error, %SiblingsError{}} =
+      Object.get_update_content_type(fetched_obj)
     assert_raise SiblingsError, fn ->
       Object.get_update_content_type!(fetched_obj)
     end
-    assert [^content_type, ^content_type] = Object.get_content_types(fetched_obj)
+    assert [^content_type, ^content_type] =
+      Object.get_content_types(fetched_obj)
 
     assert 2 = Object.value_count(fetched_obj)
     assert Object.siblings?(fetched_obj)
