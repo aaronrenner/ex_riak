@@ -276,18 +276,24 @@ defmodule ExRiak.PBSocket do
           [range_index_opt]
         ) :: {:ok, Result.t()} | {:error, PBSocketError.t()}
   def get_index_range(pid, bucket_locator, index_id, start_value, end_value, opts \\ []) do
-    index_id = SecondaryIndex.encode_secondary_index_id(index_id)
-
     case :riakc_pb_socket.get_index_range(
            pid,
            bucket_locator,
-           index_id,
+           SecondaryIndex.encode_secondary_index_id(index_id),
            start_value,
            end_value,
            opts
          ) do
-      {:ok, record} -> {:ok, Result.from_record(record)}
-      {:error, reason} -> {:error, PBSocketError.exception(reason: reason)}
+      {:ok, record} ->
+        result =
+          record
+          |> Result.from_record()
+          |> SecondaryIndex.decode_result(index_id)
+
+        {:ok, result}
+
+      {:error, reason} ->
+        {:error, PBSocketError.exception(reason: reason)}
     end
   end
 

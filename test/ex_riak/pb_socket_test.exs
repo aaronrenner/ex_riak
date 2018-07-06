@@ -222,7 +222,7 @@ defmodule ExRiak.PBSocketTest do
   end
 
   describe "get_index_range/6" do
-    test "looking up objects with a secondary index", %{conn: conn} do
+    test "looking up objects with an integer secondary index", %{conn: conn} do
       bucket = basic_leveldb_bucket()
       age_index = {:integer_index, "age"}
 
@@ -254,7 +254,49 @@ defmodule ExRiak.PBSocketTest do
       {:ok, %Result{keys: :undefined, continuation: :undefined, terms: terms}} =
         PBSocket.get_index_range(conn, bucket, age_index, 3, 10, return_terms: true)
 
-      assert Enum.sort(terms) == Enum.sort([{"8", lucy_key}, {"6", david_key}])
+      assert Enum.sort(terms) == Enum.sort([{8, lucy_key}, {6, david_key}])
+    end
+
+    test "looking up objects with a binary secondary index", %{conn: conn} do
+      bucket = basic_leveldb_bucket()
+      name_starts_with_index = {:binary_index, "name_first_letter"}
+
+      obj = Object.new(bucket, :undefined)
+
+      {:ok, fred_key} =
+        obj
+        |> set_2i(name_starts_with_index, ["f"])
+        |> Object.update_value("Fred")
+        |> put_obj(conn)
+
+      {:ok, _lucy_key} =
+        obj
+        |> set_2i(name_starts_with_index, ["l"])
+        |> Object.update_value("Lucy")
+        |> put_obj(conn)
+
+      {:ok, david_key} =
+        obj
+        |> set_2i(name_starts_with_index, ["d"])
+        |> Object.update_value("David")
+        |> put_obj(conn)
+
+      {:ok, %Result{keys: keys, continuation: :undefined, terms: :undefined}} =
+        PBSocket.get_index_range(conn, bucket, name_starts_with_index, "a", "g")
+
+      assert Enum.sort(keys) == Enum.sort([fred_key, david_key])
+
+      {:ok, %Result{keys: :undefined, continuation: :undefined, terms: terms}} =
+        PBSocket.get_index_range(
+          conn,
+          bucket,
+          name_starts_with_index,
+          "a",
+          "g",
+          return_terms: true
+        )
+
+      assert Enum.sort(terms) == Enum.sort([{"d", david_key}, {"f", fred_key}])
     end
   end
 

@@ -2,7 +2,13 @@ defmodule ExRiak.SecondaryIndex do
   @moduledoc """
   Data types used for working with secondary indexes.
   """
-  @secondary_index_types [:binary_index, :integer_index]
+
+  alias ExRiak.SecondaryIndex.Result
+
+  @binary_index_type :binary_index
+  @integer_index_type :integer_index
+
+  @secondary_index_types [@binary_index_type, @integer_index_type]
 
   @type continuation :: binary()
 
@@ -26,5 +32,19 @@ defmodule ExRiak.SecondaryIndex do
   @spec decode_secondary_index_id({atom, charlist}) :: index_id
   def decode_secondary_index_id({type, name}) do
     {type, List.to_string(name)}
+  end
+
+  @doc false
+  @spec decode_result(Result.t(), index_id) :: Result.t()
+  def decode_result(%Result{terms: terms} = result, {@integer_index_type, _})
+      when is_list(terms) do
+    terms = Enum.map(terms, fn {index_val, key} -> {String.to_integer(index_val), key} end)
+
+    %Result{result | terms: terms}
+  end
+
+  def decode_result(%Result{} = result, {index_type, _})
+      when index_type in @secondary_index_types do
+    result
   end
 end
