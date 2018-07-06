@@ -58,19 +58,21 @@ defmodule ExRiak.ObjectTest do
 
     {:ok, fetched_obj} = :riakc_pb_socket.get(conn, basic_bucket(), key)
 
-    assert {:error, %DecodingError{
-      value: ^value,
-      content_type: ^content_type
-    }} = Object.get_value(fetched_obj)
+    assert {:error,
+            %DecodingError{
+              value: ^value,
+              content_type: ^content_type
+            }} = Object.get_value(fetched_obj)
 
     assert_raise DecodingError, fn ->
       Object.get_value!(fetched_obj)
     end
 
-    assert {:error, %DecodingError{
-      value: ^value,
-      content_type: ^content_type
-    }} = Object.get_update_value(fetched_obj)
+    assert {:error,
+            %DecodingError{
+              value: ^value,
+              content_type: ^content_type
+            }} = Object.get_update_value(fetched_obj)
 
     assert_raise DecodingError, fn ->
       Object.get_update_value!(fetched_obj)
@@ -126,30 +128,35 @@ defmodule ExRiak.ObjectTest do
     {:ok, fetched_obj} = :riakc_pb_socket.get(conn, basic_bucket(), key)
 
     assert {:error, %SiblingsError{}} = Object.get_value(fetched_obj)
+
     assert_raise SiblingsError, fn ->
-       Object.get_value!(fetched_obj)
+      Object.get_value!(fetched_obj)
     end
+
     assert {:error, %SiblingsError{}} = Object.get_update_value(fetched_obj)
+
     assert_raise SiblingsError, fn ->
-       Object.get_update_value!(fetched_obj)
+      Object.get_update_value!(fetched_obj)
     end
+
     assert {:error, %SiblingsError{}} = Object.get_content_type(fetched_obj)
+
     assert_raise SiblingsError, fn ->
       Object.get_content_type!(fetched_obj)
     end
-    assert {:error, %SiblingsError{}} =
-      Object.get_update_content_type(fetched_obj)
+
+    assert {:error, %SiblingsError{}} = Object.get_update_content_type(fetched_obj)
+
     assert_raise SiblingsError, fn ->
       Object.get_update_content_type!(fetched_obj)
     end
-    assert [^content_type, ^content_type] =
-      Object.get_content_types(fetched_obj)
+
+    assert [^content_type, ^content_type] = Object.get_content_types(fetched_obj)
 
     assert 2 = Object.value_count(fetched_obj)
     assert Object.siblings?(fetched_obj)
 
-    assert {metadatas, values} =
-      fetched_obj |> Object.get_contents() |> Enum.unzip
+    assert {metadatas, values} = fetched_obj |> Object.get_contents() |> Enum.unzip()
     assert value_1 in values
     assert value_2 in values
     assert ^metadatas = Object.get_metadatas(fetched_obj)
@@ -168,20 +175,24 @@ defmodule ExRiak.ObjectTest do
     {:ok, fetched_obj} = :riakc_pb_socket.get(conn, basic_bucket(), key)
 
     assert {:error, %SiblingsError{}} = Object.get_value(fetched_obj)
+
     assert_raise SiblingsError, fn ->
-       Object.get_value!(fetched_obj)
+      Object.get_value!(fetched_obj)
     end
+
     assert {:error, %SiblingsError{}} = Object.get_update_value(fetched_obj)
+
     assert_raise SiblingsError, fn ->
-       Object.get_update_value!(fetched_obj)
+      Object.get_update_value!(fetched_obj)
     end
+
     assert {:error, %SiblingsError{}} = Object.get_content_type(fetched_obj)
+
     assert_raise SiblingsError, fn ->
       Object.get_content_type!(fetched_obj)
     end
 
-    assert {metadatas, values} =
-      fetched_obj |> Object.get_contents() |> Enum.unzip
+    assert {metadatas, values} = fetched_obj |> Object.get_contents() |> Enum.unzip()
     assert value_1 in values
     assert value_2 in values
     assert ^metadatas = Object.get_metadatas(fetched_obj)
@@ -194,6 +205,7 @@ defmodule ExRiak.ObjectTest do
     {metadata_key_2, metadata_value_2} = metadata_entry_2 = {"valid", "true"}
     {metadata_key_3, _} = metadata_entry_3 = {"remove", "me"}
     obj = Object.new(basic_bucket(), key, "val", "text/plain")
+
     metadata =
       obj
       |> Object.get_metadata!()
@@ -201,6 +213,7 @@ defmodule ExRiak.ObjectTest do
       |> Object.set_user_metadata_entry(metadata_entry_2)
       |> Object.set_user_metadata_entry(metadata_entry_3)
       |> Object.delete_user_metadata_entry(metadata_key_3)
+
     obj = Object.update_metadata(obj, metadata)
     PBSocket.put!(conn, obj)
 
@@ -215,16 +228,14 @@ defmodule ExRiak.ObjectTest do
     assert metadata_entry_2 in Object.get_user_metadata_entries(metadata)
     refute metadata_entry_3 in Object.get_user_metadata_entries(metadata)
 
-    assert ^metadata_value_1 =
-      Object.get_user_metadata_entry(metadata, metadata_key_1)
-    assert ^metadata_value_2 =
-      Object.get_user_metadata_entry(metadata, metadata_key_2)
+    assert ^metadata_value_1 = Object.get_user_metadata_entry(metadata, metadata_key_1)
+    assert ^metadata_value_2 = Object.get_user_metadata_entry(metadata, metadata_key_2)
     assert is_nil(Object.get_user_metadata_entry(metadata, "does not exist"))
 
     assert [] =
-      metadata
-      |> Object.clear_user_metadata_entries
-      |> Object.get_user_metadata_entries
+             metadata
+             |> Object.clear_user_metadata_entries()
+             |> Object.get_user_metadata_entries()
   end
 
   test "decoding metadata with siblings", %{conn: conn} do
@@ -238,11 +249,13 @@ defmodule ExRiak.ObjectTest do
     {:ok, fetched_obj} = :riakc_pb_socket.get(conn, basic_bucket(), key)
 
     assert {:error, %SiblingsError{}} = Object.get_metadata(fetched_obj)
+
     assert_raise SiblingsError, fn ->
       Object.get_metadata!(fetched_obj)
     end
 
     assert {:error, %SiblingsError{}} = Object.get_update_metadata(fetched_obj)
+
     assert_raise SiblingsError, fn ->
       Object.get_update_metadata!(fetched_obj)
     end
@@ -284,6 +297,7 @@ defmodule ExRiak.ObjectTest do
       assert_raise ArgumentError, ~r/empty value for bucket name/, fn ->
         Object.new("", "key")
       end
+
       assert_raise ArgumentError, ~r/empty value for key/, fn ->
         Object.new("my_bucket", "")
       end
@@ -295,6 +309,7 @@ defmodule ExRiak.ObjectTest do
       assert_raise ArgumentError, ~r/empty value for bucket name/, fn ->
         Object.new("", "key", "value")
       end
+
       assert_raise ArgumentError, ~r/empty value for key/, fn ->
         Object.new("my_bucket", "", "value")
       end
@@ -306,6 +321,7 @@ defmodule ExRiak.ObjectTest do
       assert_raise ArgumentError, ~r/empty value for bucket name/, fn ->
         Object.new("", "key", "value", "text/plain")
       end
+
       assert_raise ArgumentError, ~r/empty value for key/, fn ->
         Object.new("my_bucket", "", "value", "text/plain")
       end
@@ -325,8 +341,7 @@ defmodule ExRiak.ObjectTest do
 
     test "when mistakenly trying to update value with a DecodingError" do
       obj = Object.new("my_bucket", "key")
-      error =
-        DecodingError.exception(value: "value", content_type: "text/plain")
+      error = DecodingError.exception(value: "value", content_type: "text/plain")
 
       assert_raise ArgumentError, fn ->
         Object.update_value(obj, error)
@@ -347,8 +362,7 @@ defmodule ExRiak.ObjectTest do
 
     test "when mistakenly trying to update value with a DecodingError" do
       obj = Object.new("my_bucket", "key")
-      error =
-        DecodingError.exception(value: "a", content_type: "a")
+      error = DecodingError.exception(value: "a", content_type: "a")
 
       assert_raise ArgumentError, fn ->
         Object.update_value(obj, error, "text/plain")

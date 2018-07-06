@@ -10,8 +10,8 @@ defmodule ExRiak.Mixfile do
       app: :ex_riak,
       version: @version,
       elixir: "~> 1.5",
-      elixirc_paths: elixirc_paths(Mix.env),
-      start_permanent: Mix.env == :prod,
+      elixirc_paths: elixirc_paths(Mix.env()),
+      start_permanent: Mix.env() == :prod,
       description: description(),
       package: package(),
       deps: deps(),
@@ -19,7 +19,7 @@ defmodule ExRiak.Mixfile do
       # Docs
       name: "ExRiak",
       docs: docs(),
-      dialyzer: [plt_add_apps: [:ex_unit]],
+      dialyzer: [plt_add_apps: [:ex_unit]]
     ]
   end
 
@@ -37,11 +37,10 @@ defmodule ExRiak.Mixfile do
   defp deps do
     [
       {:riakc, "~> 2.5.1"},
-
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 0.5", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
-      {:inch_ex, ">= 0.5.0", only: :docs},
+      {:inch_ex, ">= 0.5.0", only: :docs}
     ]
   end
 

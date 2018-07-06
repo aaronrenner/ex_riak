@@ -21,12 +21,12 @@ defmodule ExRiak do
   @typedoc """
   A riak bucket name
   """
-  @type bucket :: String.t
+  @type bucket :: String.t()
 
   @typedoc """
   A riak bucket type.
   """
-  @type bucket_type :: String.t
+  @type bucket_type :: String.t()
 
   @typedoc """
   Combination of bucket_type and bucket
@@ -41,5 +41,5 @@ defmodule ExRiak do
   @typedoc """
   Riak object key
   """
-  @type key :: String.t
+  @type key :: String.t()
 end

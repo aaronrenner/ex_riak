@@ -7,6 +7,7 @@ defmodule ExRiak.MetadataTest do
   describe "get_content_type/1" do
     test "when a content_type has been set" do
       content_type = "text/plain"
+
       {:ok, metadata} =
         "bucket"
         |> Object.new("key", "val", content_type)
@@ -47,15 +48,13 @@ defmodule ExRiak.MetadataTest do
       assert metadata_entry_2 in Metadata.get_user_entries(metadata)
       refute metadata_entry_3 in Metadata.get_user_entries(metadata)
 
-      assert ^metadata_value_1 =
-        Metadata.get_user_entry(metadata, metadata_key_1)
-      assert ^metadata_value_2 =
-        Metadata.get_user_entry(metadata, metadata_key_2)
+      assert ^metadata_value_1 = Metadata.get_user_entry(metadata, metadata_key_1)
+      assert ^metadata_value_2 = Metadata.get_user_entry(metadata, metadata_key_2)
 
       assert [] =
-        metadata
-        |> Metadata.clear_user_entries
-        |> Metadata.get_user_entries
+               metadata
+               |> Metadata.clear_user_entries()
+               |> Metadata.get_user_entries()
     end
 
     test "get_user_entry/2 found value", %{metadata: md} do

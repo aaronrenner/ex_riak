@@ -9,8 +9,7 @@ defmodule ExRiak.PBSocketTest do
 
   test "start_link/1 with client options" do
     # This would not start if the auto_reconnect option was not passed through
-    {:ok, conn} =
-      PBSocket.start_link(hostname: 'does_not_exist', auto_reconnect: true)
+    {:ok, conn} = PBSocket.start_link(hostname: 'does_not_exist', auto_reconnect: true)
 
     assert {false, _} = :riakc_pb_socket.is_connected(conn)
   end
@@ -30,15 +29,13 @@ defmodule ExRiak.PBSocketTest do
     end
 
     test "when an object is not found", %{conn: conn} do
-      assert {:error, :not_found} =
-        PBSocket.get(conn, basic_bucket(), "does not exist")
+      assert {:error, :not_found} = PBSocket.get(conn, basic_bucket(), "does not exist")
 
-     refute PBSocket.get!(conn, basic_bucket(), "does not exist")
+      refute PBSocket.get!(conn, basic_bucket(), "does not exist")
     end
 
     test "when there is an error", %{conn: conn} do
-      assert {:error, %PBSocketError{}} =
-        PBSocket.get(conn, {"invalid type", "bucket"}, "key")
+      assert {:error, %PBSocketError{}} = PBSocket.get(conn, {"invalid type", "bucket"}, "key")
 
       assert_raise PBSocketError, fn ->
         PBSocket.get!(conn, {"invalid type", "bucket"}, "key")
@@ -130,15 +127,22 @@ defmodule ExRiak.PBSocketTest do
     test "when a value is found", %{conn: conn} do
       key = random_string()
       map = :riakc_map.new()
-      map = :riakc_map.update({"name", :register}, fn register ->
-        :riakc_register.set("Aaron", register)
-      end, map)
+
+      map =
+        :riakc_map.update(
+          {"name", :register},
+          fn register ->
+            :riakc_register.set("Aaron", register)
+          end,
+          map
+        )
+
       :ok =
         :riakc_pb_socket.update_type(
-            conn,
-            maps_bucket(),
-            key,
-            :riakc_map.to_op(map)
+          conn,
+          maps_bucket(),
+          key,
+          :riakc_map.to_op(map)
         )
 
       assert {:ok, fetched_map} = PBSocket.fetch_type(conn, maps_bucket(), key)
@@ -150,8 +154,7 @@ defmodule ExRiak.PBSocketTest do
     test "when a value is not found", %{conn: conn} do
       key = "does not exist"
 
-      assert {:error, :not_found} =
-        PBSocket.fetch_type(conn, maps_bucket(), key)
+      assert {:error, :not_found} = PBSocket.fetch_type(conn, maps_bucket(), key)
       refute PBSocket.fetch_type!(conn, maps_bucket(), key)
     end
 
@@ -160,6 +163,7 @@ defmodule ExRiak.PBSocketTest do
       bucket = {"unknown", "unknown"}
 
       assert {:error, %PBSocketError{}} = PBSocket.fetch_type(conn, bucket, key)
+
       assert_raise PBSocketError, fn ->
         PBSocket.fetch_type!(conn, bucket, key)
       end
@@ -185,8 +189,7 @@ defmodule ExRiak.PBSocketTest do
     test "when bucket type doesn't exist", %{conn: conn} do
       bucket_locator = {"apf-invalid", "bucket"}
 
-      assert {:error, %PBSocketError{}} =
-        PBSocket.list_keys(conn, bucket_locator)
+      assert {:error, %PBSocketError{}} = PBSocket.list_keys(conn, bucket_locator)
 
       assert_raise PBSocketError, fn ->
         PBSocket.list_keys!(conn, bucket_locator)

@@ -4,22 +4,24 @@ defmodule ExRiak.DecodingError do
   """
 
   @type t :: %__MODULE__{
-    message: String.t,
-    value: bitstring,
-    content_type: ExRiak.Object.content_type
-  }
+          message: String.t(),
+          value: bitstring,
+          content_type: ExRiak.Object.content_type()
+        }
 
   defexception [:message, :value, :content_type]
 
   def exception(opts) do
     value = Keyword.fetch!(opts, :value)
     content_type = Keyword.fetch!(opts, :content_type)
+
     message = """
-    unable to decode value for content type #{inspect content_type}
+    unable to decode value for content type #{inspect(content_type)}
 
     Value:
-    #{inspect value}
+    #{inspect(value)}
     """
+
     %__MODULE__{message: message, value: value, content_type: content_type}
   end
 end
@@ -30,15 +32,15 @@ defmodule ExRiak.NoValueError do
   """
 
   @type t :: %__MODULE__{
-    message: String.t,
-    object: ExRiak.Object.t
-  }
+          message: String.t(),
+          object: ExRiak.Object.t()
+        }
 
   defexception [:message, :object]
 
   def exception(opts) do
     object = Keyword.fetch!(opts, :object)
-    message = "no value for #{inspect object}"
+    message = "no value for #{inspect(object)}"
     %__MODULE__{message: message, object: object}
   end
 end
@@ -49,16 +51,15 @@ defmodule ExRiak.PBSocketError do
   """
 
   @type t :: %__MODULE__{
-    message: String.t,
-    reason: term
-  }
+          message: String.t(),
+          reason: term
+        }
 
   defexception [:message, :reason]
 
   def exception(opts) do
     reason = Keyword.fetch!(opts, :reason)
-    message =
-      "unexpected error while communicating over pb socket: #{inspect reason}"
+    message = "unexpected error while communicating over pb socket: #{inspect(reason)}"
     %__MODULE__{message: message, reason: reason}
   end
 end
@@ -69,15 +70,15 @@ defmodule ExRiak.SiblingsError do
   """
 
   @type t :: %__MODULE__{
-    message: String.t,
-    object: ExRiak.Object.t
-  }
+          message: String.t(),
+          object: ExRiak.Object.t()
+        }
 
   defexception [:message, :object]
 
   def exception(opts) do
     object = Keyword.fetch!(opts, :object)
-    message = "unexpected siblings for #{inspect object}"
+    message = "unexpected siblings for #{inspect(object)}"
     %__MODULE__{message: message, object: object}
   end
 end

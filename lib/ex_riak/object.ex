@@ -10,8 +10,8 @@ defmodule ExRiak.Object do
   alias ExRiak.NoValueError
   alias ExRiak.SiblingsError
 
-  @type t :: :riakc_obj.riakc_obj
-  @type bucket_locator :: ExRiak.bucket_locator
+  @type t :: :riakc_obj.riakc_obj()
+  @type bucket_locator :: ExRiak.bucket_locator()
 
   @typedoc """
   The binary value to use as this object's key.
@@ -19,11 +19,11 @@ defmodule ExRiak.Object do
   Can also be set to `:undefined` to have riak generate a key
   when the object is stored. See `ExRiak.PBSocket.put/2`.
   """
-  @type key :: ExRiak.key | :undefined
+  @type key :: ExRiak.key() | :undefined
   @type value :: term
-  @type content_type :: Metadata.content_type
-  @type metadata :: Metadata.t
-  @type vclock :: :riakc_obj.vclock
+  @type content_type :: Metadata.content_type()
+  @type metadata :: Metadata.t()
+  @type vclock :: :riakc_obj.vclock()
 
   @typep new_object_error_reasons :: {:zero_length_bucket, :zero_length_key}
 
@@ -116,7 +116,7 @@ defmodule ExRiak.Object do
 
   See #{erlang_doc_link({:riakc_obj, :bucket_type, 1})}.
   """
-  @spec bucket_type(t) :: ExRiak.bucket_type | :undefined
+  @spec bucket_type(t) :: ExRiak.bucket_type() | :undefined
   def bucket_type(obj), do: :riakc_obj.bucket_type(obj)
 
   @doc """
@@ -134,7 +134,7 @@ defmodule ExRiak.Object do
 
   See #{erlang_doc_link({:riakc_obj, :only_bucket, 1})}.
   """
-  @spec only_bucket(t) :: ExRiak.bucket
+  @spec only_bucket(t) :: ExRiak.bucket()
   def only_bucket(obj), do: :riakc_obj.only_bucket(obj)
 
   @doc """
@@ -143,7 +143,7 @@ defmodule ExRiak.Object do
   See #{erlang_doc_link({:riakc_obj, :get_value, 1})}.
   """
   @spec get_value(t) ::
-    {:ok, value} | {:error, SiblingsError.t | NoValueError.t | DecodingError.t}
+          {:ok, value} | {:error, SiblingsError.t() | NoValueError.t() | DecodingError.t()}
   def get_value(obj) do
     with {:ok, value} <- do_get(obj, &:riakc_obj.get_value/1),
          {:ok, content_type} <- get_content_type(obj) do
@@ -173,19 +173,19 @@ defmodule ExRiak.Object do
 
   See #{erlang_doc_link({:riakc_obj, :values, 1})}.
   """
-  @spec get_values(t) :: [value | DecodingError.t]
+  @spec get_values(t) :: [value | DecodingError.t()]
   def get_values(obj) do
     values = :riakc_obj.get_values(obj)
     content_types = get_content_types(obj)
 
     [values, content_types]
-    |> Enum.zip
+    |> Enum.zip()
     |> Enum.map(fn {v, ct} ->
-        case decode_value(v, ct) do
-          {:ok, value} -> value
-          {:error, error} -> error
-        end
-      end)
+      case decode_value(v, ct) do
+        {:ok, value} -> value
+        {:error, error} -> error
+      end
+    end)
   end
 
   @doc """
@@ -210,6 +210,7 @@ defmodule ExRiak.Object do
   def update_value(_, %DecodingError{} = error) do
     raise unexpected_decoding_error(error)
   end
+
   def update_value(obj, value) do
     :riakc_obj.update_value(obj, value)
   end
@@ -223,6 +224,7 @@ defmodule ExRiak.Object do
   def update_value(_, %DecodingError{} = error, _) do
     raise unexpected_decoding_error(error)
   end
+
   def update_value(obj, value, content_type) do
     :riakc_obj.update_value(obj, value, to_charlist(content_type))
   end
@@ -233,7 +235,7 @@ defmodule ExRiak.Object do
   See #{erlang_doc_link({:riakc_obj, :get_update_value, 1})}.
   """
   @spec get_update_value(t) ::
-    {:ok, value} | {:error, SiblingsError.t | NoValueError.t | DecodingError.t}
+          {:ok, value} | {:error, SiblingsError.t() | NoValueError.t() | DecodingError.t()}
   def get_update_value(obj) do
     with {:ok, value} <- do_get(obj, &:riakc_obj.get_update_value/1),
          {:ok, content_type} <- get_update_content_type(obj) do
@@ -275,8 +277,7 @@ defmodule ExRiak.Object do
 
   See #{erlang_doc_link({:riakc_obj, :get_content_type, 1})}.
   """
-  @spec get_content_type(t) ::
-    {:ok, content_type | :undefined} | {:error, SiblingsError.t}
+  @spec get_content_type(t) :: {:ok, content_type | :undefined} | {:error, SiblingsError.t()}
   def get_content_type(obj) do
     with {:ok, content_type} <- do_get(obj, &:riakc_obj.get_content_type/1) do
       {:ok, Metadata.decode_content_type(content_type)}
@@ -304,7 +305,7 @@ defmodule ExRiak.Object do
 
   See #{erlang_doc_link({:riakc_obj, :get_metadata, 1})}.
   """
-  @spec get_metadata(t) :: {:ok, metadata} | {:error, SiblingsError.t}
+  @spec get_metadata(t) :: {:ok, metadata} | {:error, SiblingsError.t()}
   def get_metadata(obj) do
     do_get(obj, &:riakc_obj.get_metadata/1)
   end
@@ -337,7 +338,7 @@ defmodule ExRiak.Object do
 
   See #{erlang_doc_link({:riakc_obj, :get_update_metadata, 1})}.
   """
-  @spec get_update_metadata(t) :: {:ok, metadata} | {:error, SiblingsError.t}
+  @spec get_update_metadata(t) :: {:ok, metadata} | {:error, SiblingsError.t()}
   def get_update_metadata(obj) do
     do_get(obj, &:riakc_obj.get_update_metadata/1)
   end
@@ -366,20 +367,19 @@ defmodule ExRiak.Object do
     :riakc_obj.update_metadata(obj, metadata)
   end
 
-  defdelegate get_user_metadata_entries(metadata),
-    to: Metadata, as: :get_user_entries
+  defdelegate get_user_metadata_entries(metadata), to: Metadata, as: :get_user_entries
 
   defdelegate get_user_metadata_entry(metadata, metadata_key, default \\ nil),
-    to: Metadata, as: :get_user_entry
+    to: Metadata,
+    as: :get_user_entry
 
-  defdelegate set_user_metadata_entry(metadata, metadata_entry),
-    to: Metadata, as: :set_user_entry
+  defdelegate set_user_metadata_entry(metadata, metadata_entry), to: Metadata, as: :set_user_entry
 
   defdelegate delete_user_metadata_entry(metadata, metadata_key),
-    to: Metadata, as: :delete_user_entry
+    to: Metadata,
+    as: :delete_user_entry
 
-  defdelegate clear_user_metadata_entries(metadata),
-    to: Metadata, as: :clear_user_entries
+  defdelegate clear_user_metadata_entries(metadata), to: Metadata, as: :clear_user_entries
 
   @doc """
   Returns the content type of the update value.
@@ -387,7 +387,7 @@ defmodule ExRiak.Object do
   See #{erlang_doc_link({:riakc_obj, :get_update_content_type, 1})}.
   """
   @spec get_update_content_type(t) ::
-    {:ok, content_type | :undefined} | {:error, SiblingsError.t}
+          {:ok, content_type | :undefined} | {:error, SiblingsError.t()}
   def get_update_content_type(obj) do
     with {:ok, ct} <- do_get(obj, &:riakc_obj.get_update_content_type/1) do
       {:ok, Metadata.decode_content_type(ct)}
@@ -481,8 +481,7 @@ defmodule ExRiak.Object do
   @spec set_vclock(t, vclock) :: t
   def set_vclock(obj, vclock), do: :riakc_obj.set_vclock(obj, vclock)
 
-  @spec do_get(t, function) ::
-    {:ok, term} | {:error, SiblingsError.t, NoValueError.t}
+  @spec do_get(t, function) :: {:ok, term} | {:error, SiblingsError.t(), NoValueError.t()}
   defp do_get(obj, function) do
     {:ok, function.(obj)}
   catch
@@ -490,31 +489,32 @@ defmodule ExRiak.Object do
     :no_value -> {:error, NoValueError.exception(object: obj)}
   end
 
-  @spec decode_value(value, content_type) ::
-    {:ok, value} | {:error, DecodingError.t}
+  @spec decode_value(value, content_type) :: {:ok, value} | {:error, DecodingError.t()}
   defp decode_value(value, "application/x-erlang-binary" = ct) do
     {:ok, :erlang.binary_to_term(value)}
   rescue
     ArgumentError ->
       {:error, DecodingError.exception(value: value, content_type: ct)}
   end
+
   defp decode_value(value, _), do: {:ok, value}
 
-  @spec raise_on_new_error_response(t | {:error, new_object_error_reasons}) ::
-    t | no_return
+  @spec raise_on_new_error_response(t | {:error, new_object_error_reasons}) :: t | no_return
   defp raise_on_new_error_response({:error, :zero_length_bucket}) do
     raise ArgumentError, "empty value for bucket name"
   end
+
   defp raise_on_new_error_response({:error, :zero_length_key}) do
     raise ArgumentError, "empty value for key"
   end
+
   defp raise_on_new_error_response(obj), do: obj
 
   defp unexpected_decoding_error(%DecodingError{} = error) do
     message = """
     unexpected argument
 
-      #{inspect error}
+      #{inspect(error)}
     """
 
     ArgumentError.exception(message: message)

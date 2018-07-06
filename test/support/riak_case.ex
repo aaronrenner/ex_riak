@@ -13,19 +13,19 @@ defmodule ExRiak.RiakCase do
   setup_all do
     {:ok, conn} = build_connection()
 
-    on_exit fn ->
+    on_exit(fn ->
       {:ok, conn} = build_connection()
       clean_bucket(conn, basic_bucket())
       clean_bucket(conn, maps_bucket())
-    end
+    end)
 
     [conn: conn]
   end
 
   def random_string(length \\ 48) do
     length
-    |> :crypto.strong_rand_bytes
-    |> Base.url_encode64
+    |> :crypto.strong_rand_bytes()
+    |> Base.url_encode64()
     |> binary_part(0, length)
   end
 
@@ -43,9 +43,11 @@ defmodule ExRiak.RiakCase do
 
   def clean_bucket(conn, bucket) do
     {:ok, keys} = :riakc_pb_socket.list_keys(conn, bucket)
-    Enum.each keys, fn key ->
+
+    Enum.each(keys, fn key ->
       :ok = PBSocket.delete(conn, bucket, key)
-    end
+    end)
+
     wait_for_empty(conn, bucket)
   end
 
@@ -53,6 +55,7 @@ defmodule ExRiak.RiakCase do
     case :riakc_pb_socket.list_keys(conn, bucket) do
       {:ok, []} ->
         :ok
+
       {:ok, _} ->
         Process.sleep(100)
         wait_for_empty(conn, bucket)

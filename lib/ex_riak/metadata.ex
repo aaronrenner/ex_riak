@@ -5,15 +5,15 @@ defmodule ExRiak.Metadata do
 
   import ExRiak.Docs
 
-  @type t :: :riakc_obj.metadata
-  @type key :: String.t
-  @type value :: String.t
+  @type t :: :riakc_obj.metadata()
+  @type key :: String.t()
+  @type value :: String.t()
   @type entry :: {key, value}
 
   @typedoc """
   Content type of an `ExRiak.Object`'s value
   """
-  @type content_type :: String.t
+  @type content_type :: String.t()
 
   @content_type_metadata_key "content-type"
 
@@ -25,6 +25,7 @@ defmodule ExRiak.Metadata do
     case :dict.find(@content_type_metadata_key, metadata) do
       {:ok, content_type} ->
         decode_content_type(content_type)
+
       :error ->
         :undefined
     end
@@ -49,8 +50,7 @@ defmodule ExRiak.Metadata do
 
   See #{erlang_doc_link({:riakc_obj, :get_user_metadata_entry, 2})}.
   """
-  @spec get_user_entry(t, key, default :: term) ::
-    value | term
+  @spec get_user_entry(t, key, default :: term) :: value | term
   def get_user_entry(metadata, metadata_key, default \\ nil) do
     case :riakc_obj.get_user_metadata_entry(metadata, metadata_key) do
       :notfound -> default
@@ -89,8 +89,9 @@ defmodule ExRiak.Metadata do
   end
 
   @doc false
-  @spec decode_content_type(charlist | :undefined) :: String.t | :undefined
+  @spec decode_content_type(charlist | :undefined) :: String.t() | :undefined
   def decode_content_type(:undefined), do: :undefined
+
   def decode_content_type(content_type) do
     List.to_string(content_type)
   end

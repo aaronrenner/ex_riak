@@ -13,25 +13,25 @@ defmodule ExRiak.PBSocket do
 
   @type t :: pid
 
-  @type bucket_locator :: ExRiak.bucket_locator
-  @type key :: ExRiak.key
+  @type bucket_locator :: ExRiak.bucket_locator()
+  @type key :: ExRiak.key()
   @type port_number :: 0..65_535
 
   @type client_opt ::
-    :queue_if_disconnected |
-    {:queue_if_disconnected, boolean} |
-    {:connect_timeout, pos_integer} |
-    :auto_reconnect |
-    {:auto_reconnect, boolean} |
-    :keepalive |
-    {:keepalive, boolean}
+          :queue_if_disconnected
+          | {:queue_if_disconnected, boolean}
+          | {:connect_timeout, pos_integer}
+          | :auto_reconnect
+          | {:auto_reconnect, boolean}
+          | :keepalive
+          | {:keepalive, boolean}
 
   @type client_opts :: [client_opt]
 
   @type start_link_opt ::
-    {:hostname, String.t} |
-    {:port, port_number} |
-    client_opt
+          {:hostname, String.t()}
+          | {:port, port_number}
+          | client_opt
 
   @type start_link_opts :: [start_link_opt]
 
@@ -51,7 +51,7 @@ defmodule ExRiak.PBSocket do
 
   See #{erlang_doc_link({:riakc_pb_socket, :start_link, 3})}.
   """
-  @spec start_link(start_link_opts) :: GenServer.on_start
+  @spec start_link(start_link_opts) :: GenServer.on_start()
   def start_link(opts \\ []) do
     {hostname, opts} = Keyword.pop_lazy(opts, :hostname, &default_hostname/0)
     {port, opts} = Keyword.pop_lazy(opts, :port, &default_port/0)
@@ -65,7 +65,7 @@ defmodule ExRiak.PBSocket do
   See #{erlang_doc_link({:riakc_pb_socket, :get, 3})}.
   """
   @spec get(t, bucket_locator, key) ::
-    {:ok, Object.t} | {:error, :not_found | PBSocketError.t}
+          {:ok, Object.t()} | {:error, :not_found | PBSocketError.t()}
   def get(client, bucket_locator, key) do
     case :riakc_pb_socket.get(client, bucket_locator, key) do
       {:ok, obj} -> {:ok, obj}
@@ -92,7 +92,7 @@ defmodule ExRiak.PBSocket do
 
   [update-cycle]: http://docs.basho.com/riak/kv/2.2.3/developing/usage/updating-objects/
   """
-  @spec get!(t, bucket_locator, key) :: Object.t | nil | no_return
+  @spec get!(t, bucket_locator, key) :: Object.t() | nil | no_return
   def get!(client, bucket_locator, key) do
     case get(client, bucket_locator, key) do
       {:ok, obj} -> obj
@@ -110,8 +110,7 @@ defmodule ExRiak.PBSocket do
 
   See #{erlang_doc_link({:riakc_pb_socket, :put, 2})}.
   """
-  @spec put(t, Object.t) ::
-    :ok | {:ok, key} | {:error, PBSocketError.t | SiblingsError.t}
+  @spec put(t, Object.t()) :: :ok | {:ok, key} | {:error, PBSocketError.t() | SiblingsError.t()}
   def put(client, obj) do
     case :riakc_pb_socket.put(client, obj) do
       :ok -> :ok
@@ -129,8 +128,7 @@ defmodule ExRiak.PBSocket do
 
   See `put/2` for more details.
   """
-  @spec put!(t, Object.t) ::
-    :ok | {:ok, key} | no_return
+  @spec put!(t, Object.t()) :: :ok | {:ok, key} | no_return
   def put!(client, obj) do
     case put(client, obj) do
       :ok -> :ok
@@ -144,7 +142,7 @@ defmodule ExRiak.PBSocket do
 
   See #{erlang_doc_link({:riakc_pb_socket, :delete, 3})}.
   """
-  @spec delete(t, bucket_locator, key) :: :ok | {:error, PBSocketError.t}
+  @spec delete(t, bucket_locator, key) :: :ok | {:error, PBSocketError.t()}
   def delete(pid, bucket_locator, key) do
     case :riakc_pb_socket.delete(pid, bucket_locator, key) do
       :ok -> :ok
@@ -171,7 +169,7 @@ defmodule ExRiak.PBSocket do
   See #{erlang_doc_link({:riakc_pb_socket, :fetch_type, 3})}.
   """
   @spec fetch_type(t, bucket_locator, key) ::
-    {:ok, DataType.t} | {:error, :not_found | PBSocketError.t}
+          {:ok, DataType.t()} | {:error, :not_found | PBSocketError.t()}
   def fetch_type(pid, bucket_locator, key) do
     case :riakc_pb_socket.fetch_type(pid, bucket_locator, key) do
       {:ok, dt} -> {:ok, dt}
@@ -187,8 +185,7 @@ defmodule ExRiak.PBSocket do
 
   See #{erlang_doc_link({:riakc_pb_socket, :fetch_type, 3})}.
   """
-  @spec fetch_type!(t, bucket_locator, key) ::
-    DataType.t | nil | no_return
+  @spec fetch_type!(t, bucket_locator, key) :: DataType.t() | nil | no_return
   def fetch_type!(pid, bucket_locator, key) do
     case fetch_type(pid, bucket_locator, key) do
       {:ok, dt} -> dt
@@ -205,7 +202,7 @@ defmodule ExRiak.PBSocket do
 
   See #{erlang_doc_link({:riakc_pb_socket, :list_keys, 2})}.
   """
-  @spec list_keys(t, bucket_locator) :: {:ok, [key]} | {:error, PBSocketError.t}
+  @spec list_keys(t, bucket_locator) :: {:ok, [key]} | {:error, PBSocketError.t()}
   def list_keys(pid, bucket_locator) do
     case :riakc_pb_socket.list_keys(pid, bucket_locator) do
       {:ok, keys} -> {:ok, keys}
@@ -231,7 +228,7 @@ defmodule ExRiak.PBSocket do
     end
   end
 
-  @spec default_hostname :: String.t
+  @spec default_hostname :: String.t()
   defp default_hostname do
     Application.get_env(:ex_riak, :default_hostname, "localhost")
   end

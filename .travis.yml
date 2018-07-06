@@ -3,6 +3,7 @@ matrix:
   include:
     - elixir: "1.5.3"
       otp_release: "20.0"
+      env: "EX_RIAK_SKIP_MIX_FORMAT=yes"
     - elixir: "1.6.6"
       otp_release: "20.3.8.2"
 dist: trusty
@@ -34,6 +35,7 @@ script:
   - mix test
   - MIX_ENV=test mix credo --strict
   - MIX_ENV=test mix dialyzer --halt-exit-status
+  - if [ "$EX_RIAK_SKIP_MIX_FORMAT" != "yes" ]; then MIX_ENV=test mix format --check-formatted; fi
 
 after_script:
   - mix deps.get --only docs
