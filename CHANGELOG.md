@@ -1,3 +1,31 @@
+## 0.4.0 (2018-07-06)
+
+This release adds functions for support for working with secondary indexs.
+
+### Features
+
+* New functions for working with objects
+    * `Object.get_secondary_indexes/1`
+    * `Object.get_secondary_index/3`
+    * `Object.add_secondary_index/2`
+    * `Object.set_secondary_index/2`
+    * `Object.delete_secondary_index/2`
+    * `Object.clear_secondary_indexes/1`
+* New functions for working with PBSockets
+    * `PBSocket.get_index_eq/5`
+    * `PBSocket.get_index_range/6`
+* New functions for working with metadata objects
+    * `Metadata.get_secondary_indexes/1`
+    * `Metadata.get_secondary_index/3`
+    * `Metadata.add_secondary_index/2`
+    * `Metadata.set_secondary_index/2`
+    * `Metadata.delete_secondary_index/2`
+    * `Metadata.clear_secondary_indexes/1`
+
+### Bug fixes
+
+* Fixed typespecs and docs for `PBSocket.put/2`.
+
 ## 0.3.1 (2018-01-08)
 
 ### Features

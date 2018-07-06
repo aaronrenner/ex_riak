@@ -32,7 +32,7 @@ Add ExRiak to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:ex_riak, "~> 0.3.1"}]
+  [{:ex_riak, "~> 0.4.0"}]
 end
 ```
 
