@@ -26,6 +26,11 @@ This release adds functions for support for working with secondary indexs.
 
 * Fixed typespecs and docs for `PBSocket.put/2`.
 
+### Acknowledgements
+
+A big thanks to @koudelka for his [PR](https://github.com/aaronrenner/ex_riak/pull/1)
+which inspired many of the changes in this release.
+
 ## 0.3.1 (2018-01-08)
 
 ### Features
