@@ -367,34 +367,67 @@ defmodule ExRiak.Object do
     :riakc_obj.update_metadata(obj, metadata)
   end
 
+  @doc """
+  See `#{inspect(Metadata)}.get_user_entries/1`.
+  """
   defdelegate get_user_metadata_entries(metadata), to: Metadata, as: :get_user_entries
 
+  @doc """
+  See `#{inspect(Metadata)}.get_user_entry/3`.
+  """
   defdelegate get_user_metadata_entry(metadata, metadata_key, default \\ nil),
     to: Metadata,
     as: :get_user_entry
 
+  @doc """
+  See `#{inspect(Metadata)}.set_user_entry/2`.
+  """
   defdelegate set_user_metadata_entry(metadata, metadata_entry), to: Metadata, as: :set_user_entry
 
+  @doc """
+  See `#{inspect(Metadata)}.delete_user_entry/2`.
+  """
   defdelegate delete_user_metadata_entry(metadata, metadata_key),
     to: Metadata,
     as: :delete_user_entry
 
+  @doc """
+  See `#{inspect(Metadata)}.clear_user_entries/1`.
+  """
   defdelegate clear_user_metadata_entries(metadata), to: Metadata, as: :clear_user_entries
 
+  @doc """
+  See `#{inspect(Metadata)}.get_secondary_indexes/1`.
+  """
   defdelegate get_secondary_indexes(metadata), to: Metadata, as: :get_secondary_indexes
 
+  @doc """
+  See `#{inspect(Metadata)}.get_secondary_index/3`.
+  """
   defdelegate get_secondary_index(metadata, secondary_index_id, default \\ nil),
     to: Metadata,
     as: :get_secondary_index
 
+  @doc """
+  See `#{inspect(Metadata)}.add_secondary_index/2`.
+  """
   defdelegate add_secondary_index(metadata, index), to: Metadata, as: :add_secondary_index
 
+  @doc """
+  See `#{inspect(Metadata)}.set_secondary_index/2`.
+  """
   defdelegate set_secondary_index(metadata, index), to: Metadata, as: :set_secondary_index
 
+  @doc """
+  See `#{inspect(Metadata)}.delete_secondary_index/2`.
+  """
   defdelegate delete_secondary_index(metadata, secondary_index_id),
     to: Metadata,
     as: :delete_secondary_index
 
+  @doc """
+  See `#{inspect(Metadata)}.clear_secondary_indexes/2`.
+  """
   defdelegate clear_secondary_indexes(metadata), to: Metadata, as: :clear_secondary_indexes
 
   @doc """
