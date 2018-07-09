@@ -11,7 +11,7 @@ example:
 
 ```elixir
 # Can use the :riakc_pb_socket directly from erlang
-{:ok, conn} = :riakc_pb_socket.start_link("127.0.0.1", 8087)
+{:ok, conn} = :riakc_pb_socket.start_link('127.0.0.1', 8087)
 
 with {:ok, obj} <- ExRiak.PBSocket.get(conn, "tv_show_ratings", "simpsons"),
      # Can drop down to erlang if nessecary
