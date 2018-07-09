@@ -109,9 +109,7 @@ defmodule ExRiak.Metadata do
   def get_secondary_indexes(metadata) do
     metadata
     |> :riakc_obj.get_secondary_indexes()
-    |> Enum.map(fn {id, values} ->
-      {SecondaryIndex.decode_secondary_index_id(id), values}
-    end)
+    |> Enum.map(&decode_secondary_index/1)
   end
 
   @doc """
@@ -143,6 +141,7 @@ defmodule ExRiak.Metadata do
   """
   @spec add_secondary_index(t, secondary_index | [secondary_index]) :: t
   def add_secondary_index(metadata, index) do
+    index = encode_secondary_index(index)
     :riakc_obj.add_secondary_index(metadata, index)
   end
 
@@ -153,6 +152,11 @@ defmodule ExRiak.Metadata do
   """
   @spec set_secondary_index(t, secondary_index | [secondary_index]) :: t
   def set_secondary_index(metadata, indexes) do
+    indexes =
+      indexes
+      |> List.wrap()
+      |> Enum.map(&encode_secondary_index/1)
+
     :riakc_obj.set_secondary_index(metadata, indexes)
   end
 
@@ -183,5 +187,13 @@ defmodule ExRiak.Metadata do
 
   def decode_content_type(content_type) do
     List.to_string(content_type)
+  end
+
+  defp encode_secondary_index({id, val}) do
+    {SecondaryIndex.encode_secondary_index_id(id), val}
+  end
+
+  defp decode_secondary_index({id, values}) do
+    {SecondaryIndex.decode_secondary_index_id(id), values}
   end
 end
