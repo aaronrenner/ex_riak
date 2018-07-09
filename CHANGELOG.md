@@ -1,6 +1,17 @@
+## 0.4.1 (2018-07-09)
+
+### Bug fixes
+
+* Fixed dialyzer errors when calling `Metadata.set_secondary_index/2` and
+  `Metadata.add_secondary_index/2`.
+
+### Improvements
+
+* Added documentation for delegated `Object` functions.
+
 ## 0.4.0 (2018-07-06)
 
-This release adds functions for support for working with secondary indexs.
+This release adds functions for support for working with secondary indexes.
 
 ### Features
 
