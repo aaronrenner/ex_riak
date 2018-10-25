@@ -207,6 +207,8 @@ defmodule ExRiak.Object do
   See #{erlang_doc_link({:riakc_obj, :update_value, 2})}.
   """
   @spec update_value(t, value) :: t
+  def update_value(obj, value)
+
   def update_value(_, %DecodingError{} = error) do
     raise unexpected_decoding_error(error)
   end
@@ -221,6 +223,8 @@ defmodule ExRiak.Object do
   See #{erlang_doc_link({:riakc_obj, :update_value, 3})}.
   """
   @spec update_value(t, value, content_type) :: t
+  def update_value(obj, value, content_type)
+
   def update_value(_, %DecodingError{} = error, _) do
     raise unexpected_decoding_error(error)
   end
